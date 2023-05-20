@@ -72,6 +72,7 @@ class Session:
                     #nickname = self.nicknames[idx]
                     # send to other players that player left
                     #self.nicknames.remove(nickname)
+                    break
 
             time.sleep(16/1000)
 
