@@ -12,7 +12,7 @@ class Network:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
         #self.client.settimeout(10.0)
-        self.host = '20.111.24.134'
+        self.host = '98.66.137.14'
         self.port = 55555
         self.addr = (self.host, self.port)
 
@@ -65,10 +65,9 @@ class Network:
         try:
             reply = self.client.recv(19)
             print("reply", reply)
-            # reply = pickle.loads(reply)
             reply = reply.decode()
+            return reply
         except Exception as e:
             print(e)
         
-        return reply
 

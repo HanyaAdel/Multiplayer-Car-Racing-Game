@@ -188,29 +188,61 @@ def sender_thread():
         reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
         server.send(reply)
 
-def parse_data(data):
+def parse_location(data):
         try:
             d = data.split(":")
-            return d[0], int(d[1]), int(d[2]), int(d[3])
+            return int(d[1]), int(d[2]), int(d[3])
+        except:
+            pass
+def parse_left(data):
+    try:
+        d = data.split(":")
+        return d[1]
+    except:
+        pass    
+
+def getHeader(data):
+        try:
+            d = data.split(":")
+            return d[0]
         except:
             pass
 
+def get_player_idx_by_id(players, id):
+    for player_idx, player in enumerate(players):
+        if player['id'] == id:
+            return player_idx
+    
+    return -1
 def receiver_thread():
     global current_id, server
     # clock = pygame.time.Clock()
     while True:
         data = server.receive()
         if not data:
-            server.send(str.encode("Goodbye"))
-            break
+            print("empty reply")
+            #server.send("Goodbye")
+            continue
         else:
             reply = data
-            header, id, x, y = parse_data(reply)
-            if id >= len(players):
-                players.append({'id':id, 'x':0, 'y':0})
-            if header == "LOCATION":
-                players[id]['x'] = x
-                players[id]['y'] = y
+            header = getHeader(reply)
+            if (header == "LOCATION"):
+                id, x, y = parse_location(reply)
+                player_idx = get_player_idx_by_id(players=players,id=id)
+                if player_idx == -1:
+                    players.append({'id':id, 'x':x, 'y':y})
+                else:
+                    players[player_idx]['x'] = x
+                    players[player_idx]['y'] = y
+                
+
+            if header == "LEFT":
+                id = parse_left(reply)
+                print("player ", id, " left the game")
+
+                deleted_player_idx = get_player_idx_by_id(players, id)
+                del players[deleted_player_idx]
+
 
 # get users name
 while True:
