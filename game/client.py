@@ -69,5 +69,6 @@ class Network:
             return reply
         except Exception as e:
             print(e)
+            self.client.close()
         
 
