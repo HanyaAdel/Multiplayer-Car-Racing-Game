@@ -58,17 +58,19 @@ class Network:
 
             # return reply
         except socket.error as e:
-            # print(e)
+            print(e)
             pass
     
     def receive(self):
-        try:
-            reply = self.client.recv(19)
-            print("reply", reply)
-            reply = reply.decode()
-            return reply
-        except Exception as e:
-            print(e)
-            self.client.close()
+        # try:
+
+        # except Exception as e:
+        #     print(e)
+        #     self.client.close()
+
+        reply = self.client.recv(19)
+        print("reply", reply)
+        reply = reply.decode()
+        return reply
         
 

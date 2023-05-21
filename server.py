@@ -46,17 +46,7 @@ class Session:
                 self.nicknames.remove(nickname)
                 break
 
-    # Receiving / Listening Function
-    def receive(self):
-        while True:
-            # Accept Connection
-            client, address = server.accept()
-            print("Connected with {}".format(str(address)))
 
-
-            # Start Handling Thread For Client
-            thread = threading.Thread(target=self.handle, args=(client,))
-            thread.start()
     
     def add_client(self, client):
         print("Connected")

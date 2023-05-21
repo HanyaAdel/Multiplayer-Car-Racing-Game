@@ -237,12 +237,15 @@ def receiver_thread():
                         players[player_idx]['y'] = y
                     
 
-                if header == "LEFT":
-                    id = parse_left(reply)
-                    print("player ", id, " left the game")
+                # if header == "LEFT":
+                #     id = parse_left(reply)
+                #     print("player ", id, " left the game")
 
-                    deleted_player_idx = get_player_idx_by_id(players, id)
-                    del players[deleted_player_idx]
+                #     deleted_player_idx = get_player_idx_by_id(players, id)
+                #     if (deleted_player_idx != -1):
+                #         del players[deleted_player_idx]
+                #     elif(deleted_player_idx == -1):
+                            #pass
         except:
             break
 
