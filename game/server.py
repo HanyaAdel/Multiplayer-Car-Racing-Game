@@ -19,15 +19,14 @@ server.bind((host, port))
 server.listen()
 
 class Session:
-
+    
     # Lists For Clients and Their Nicknames
-    clients = []
-    nicknames = []
-    players =[]
-    current_id = 0
 
-    def __init__(self):
+    def __init__(self, id):
+        self.current_id = 0
+        self.session_id = id
         self.clients = []
+        self.players = []
         self.nicknames = []
         self.senderThread = threading.Thread(target=self.sender_thread, args=())
         self.senderThread.start()
@@ -43,33 +42,54 @@ class Session:
         y = random.randrange(0,H)
         return (x,y)
     
+    # def check_socket_connected(self, sock):
+    #     data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
+    #     if len(data) == 0:
+    #         return False
+    #     return True
+    
+    def remove_client(self, idx):
+        #client['client'].close()
+        print("beginning of remove client")
+        toBeDeleted_id = self.players[idx]['id']
+        self.clients.pop(idx)
+        print("in first pop")
+        
+        self.players.pop(idx)
+        
+        print("from send ", idx)
+
+        print("boradcasting player leave", toBeDeleted_id)
+        message = f"LEFT:{toBeDeleted_id}"
+        self.broadcast(message=message)
+        print("after broadcast")
+    
     def sender_thread(self):
         while True:
-            print(self.clients)
+            # print(self.clients)
+            # print("session id:",self.session_id)
+            # print(self.players)
             for idx , client in enumerate(self.clients):
-                print("in for loop kbera, ", idx)
+                # connected = self.check_socket_connected(client['client'])
+                # if not connected:
+                #     self.remove_client(idx=idx)
+                #     continue
+
+                # print("in for loop kbera, ", idx)
                 client_id = client["id"]
                 try:
                     for player in self.players:
                         player_id = player['id']
-                        if player_id == client_id:
-                            continue
+                        # if player_id == client_id:
+                        #     continue
                         reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}"
                         while len(reply)<19:
                             reply+=' '
                         #print("sending ", reply, "to", client)
                         client['client'].send(str.encode(reply))
                 except:
-                    
-                    #client['client'].close()
-
-                    
-                    self.clients.pop(idx)
-                    print("in first pop")
-                    
-                    self.players.pop(idx)
-                    
-                    print("from send ", idx)
+                    print("in exception")
+                    self.remove_client(idx=idx)
 
                     # reply = f"LEFT:{player_id}"
                     # while len(reply) < 19:
@@ -85,7 +105,6 @@ class Session:
 
     def parse_data(self, data):
         try:
-
             d = data.split(":")
             return d[0], int(d[1]), int(d[2]), int(d[3])
         except Exception as e:
@@ -123,7 +142,7 @@ class Session:
                         idx = self.get_player_idx_by_id(id)
                         if (idx == -1):
                             continue
-                        print("in location condition")
+                        # print("in location condition")
                         self.players[idx]['x'] = x
                         self.players[idx]['y'] = y
             except Exception as e:
@@ -150,13 +169,15 @@ class Session:
         # nickname = client.recv(1024).decode('ascii')
 
         # self.nicknames.append(nickname)
+        print("adding client in session", self.session_id)
         self.clients.append({ 'id': self.current_id, 'client': client })
         self.players.append({'id':self.current_id, 'x':0, 'y':0})
-        client.send(str.encode(str(self.current_id))) 
+        message = f"{self.current_id}:{len(self.players)}"
+        client.send(str.encode(str(message))) 
 
 
-        thread = threading.Thread(target=self.player_handle, args=(client,))
-        thread.start()  
+        self.thread = threading.Thread(target=self.player_handle, args=(client,))
+        self.thread.start()  
         self.current_id += 1
 
 
@@ -166,14 +187,34 @@ sessions = []
 
 # Receiving / Listening Function
 def create_session():
-        newSession = Session()
-        sessions.append(newSession)
+        # newSession = Session()
+        # sessions.append(newSession)
         while True:
             # Accept Connection
             client, address = server.accept()
             print("Connected with {}".format(str(address)))
 
+            # Request And Store Nickname
+            # client.send('NEW_SESSION'.encode('ascii'))
+            newSession = client.recv(1024).decode('ascii')
 
-            newSession.add_client(client=client)
+            # newSession.add_client(client=client)
+            print(newSession)
+            if newSession == 'yes':
+                # start new session
+                newSession = Session(id=len(sessions))
+                sessions.append(newSession)
+
+                newSession.add_client(client=client)
+
+            if newSession == 'no':
+
+
+                # client.send('SESSION_NUM'.encode('ascii'))
+
+                sessionNum = client.recv(1024).decode('ascii')
+
+                session = sessions[int(sessionNum)]
+                session.add_client(client)
             
 create_session()

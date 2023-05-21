@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Connection Data
-host = '127.0.0.1'
+host = ''
 port = 55555
 
 # Starting Server
@@ -11,12 +11,13 @@ server.bind((host, port))
 server.listen()
 
 class Session:
-
+    session_id = None
     # Lists For Clients and Their Nicknames
     clients = []
     nicknames = []
 
-    def __init__(self):
+    def __init__(self, id):
+        self.session_id = id
         self.clients = []
         self.nicknames = []
 
@@ -28,6 +29,8 @@ class Session:
     # Handling Messages From Clients
     def handle(self, client):
         while True:
+            print("Session id", self.session_id)
+            print(self.nicknames)
             try:
                 # Broadcasting Messages
                 message = client.recv(1024).decode('ascii')
@@ -85,7 +88,7 @@ def join_session():
             print(newSession)
             if newSession == 'yes':
                 # start new session
-                newSession = Session()
+                newSession = Session(id=len(sessions))
                 sessions.append(newSession)
 
                 newSession.add_client(client=client)

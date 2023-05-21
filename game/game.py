@@ -104,9 +104,10 @@ def main(name):
 
     # start by connecting to the network
     server = Network()
-    current_id = server.connect(name)
-    for i in range(current_id+1):
-        players.append({'id':i, 'x':0, 'y':0})
+    current_id, num_players = server.connect(name)
+    players.append({'id':current_id, 'x':0, 'y':0})
+    # for i in range(current_id+1):
+    #     players.append({'id':i, 'x':0, 'y':0})
 
     # players = server.send("get")
 
@@ -116,7 +117,8 @@ def main(name):
     sendThread.start()
     receiveThread.start()
 
-
+    while num_players<len(players):
+        continue
     # setup the clock, limit to 30fps
     clock = pygame.time.Clock()
 
@@ -124,7 +126,8 @@ def main(name):
 
     while run:
         clock.tick(60) # 30 fps max
-        player = players[current_id]
+        player_idx = get_player_idx_by_id(id=current_id)
+        player = players[player_idx]
         # print(player)
         # print(players)
 
@@ -184,7 +187,8 @@ def sender_thread():
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
-        player = players[current_id]
+        player_idx = get_player_idx_by_id(id=current_id)
+        player = players[player_idx]
         reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
         server.send(reply)
 
@@ -197,7 +201,7 @@ def parse_location(data):
 def parse_left(data):
     try:
         d = data.split(":")
-        return d[1]
+        return int(d[1])
     except:
         pass    
 
@@ -208,7 +212,8 @@ def getHeader(data):
         except:
             pass
 
-def get_player_idx_by_id(players, id):
+def get_player_idx_by_id(id):
+    global players
     for player_idx, player in enumerate(players):
         if player['id'] == id:
             return player_idx
@@ -229,23 +234,26 @@ def receiver_thread():
                 header = getHeader(reply)
                 if (header == "LOCATION"):
                     id, x, y = parse_location(reply)
-                    player_idx = get_player_idx_by_id(players=players,id=id)
-                    if player_idx == -1:
+                    player_idx = get_player_idx_by_id(id=id)
+                    if id == current_id:
+                        continue
+                    elif player_idx == -1:
                         players.append({'id':id, 'x':x, 'y':y})
                     else:
                         players[player_idx]['x'] = x
                         players[player_idx]['y'] = y
                     
 
-                # if header == "LEFT":
-                #     id = parse_left(reply)
-                #     print("player ", id, " left the game")
-
-                #     deleted_player_idx = get_player_idx_by_id(players, id)
-                #     if (deleted_player_idx != -1):
-                #         del players[deleted_player_idx]
-                #     elif(deleted_player_idx == -1):
-                            #pass
+                if header == "LEFT":
+                    id = parse_left(reply)
+                    print("player ", id, " left the game")
+                    print(players)
+                    deleted_player_idx = get_player_idx_by_id(id)
+                    if (deleted_player_idx != -1):
+                        del players[deleted_player_idx]
+                    elif(deleted_player_idx == -1):
+                            print("got -1 in getplayeridxbyid")
+                            pass
         except:
             break
 
