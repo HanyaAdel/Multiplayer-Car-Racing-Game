@@ -104,7 +104,7 @@ def main(name):
     # start by connecting to the network
     server = Network()
     current_id, num_players = server.connect(name)
-    players.append({'id':current_id, 'x':0, 'y':0})
+    players.append({'id':current_id, 'name': name,'x':0, 'y':0})
     # for i in range(current_id+1):
     #     players.append({'id':i, 'x':0, 'y':0})
 
@@ -115,6 +115,13 @@ def main(name):
     receiveThread = threading.Thread(target=receiver_thread)
     sendThread.start()
     receiveThread.start()
+
+    # Starting Threads For Listening And Writing
+    chat_receive_thread = threading.Thread(target=receive)
+    chat_receive_thread.start()
+
+    chat_write_thread = threading.Thread(target=write)
+    chat_write_thread.start()
 
     while num_players<len(players):
         continue
@@ -241,7 +248,7 @@ def receiver_thread():
                 if header == "LEFT":
                     id = parse_leaving_player(reply)
                     print("player ", id, " left the game")
-                    print(players)
+                    #print(players)
                     deleted_player_idx = get_player_idx_by_id(id)
                     if (deleted_player_idx != -1):
                         del players[deleted_player_idx]
@@ -251,6 +258,27 @@ def receiver_thread():
         except:
             break
 
+# Listening to Server and Sending Nickname
+def receive():
+    global server
+    while True:
+        try:
+            message = server.receive()
+            header = getHeader(message)
+            if header == "MESSAGE":
+                print("in chat receive ", message)
+            else: pass
+        except:
+            # Close Connection When Error
+            print("An error occured!")
+            server.close()
+            break
+
+# Sending Messages To Server
+def write():
+    while True:
+        message = input('')
+        server.send("MESSAGE:", message)
 
 # get users name
 while True:

@@ -23,7 +23,6 @@ class Network:
         :return: int reprsenting id
         """
         self.client.connect(self.addr)
-        # self.client.send(str.encode(name))
 
 
         new_session = input("Do you want to start a new session? yes, no ")
@@ -34,6 +33,7 @@ class Network:
             session_num = input("Enter session number: ")
             self.client.send(session_num.encode('ascii'))
 
+        self.client.send(str.encode(name))
         # If 'NICK' Send Nickname
         # message = client.recv(1024).decode('ascii')
         # nickname = input("Choose your nickname: ")
@@ -41,6 +41,7 @@ class Network:
 
 
         reply = self.client.recv(5)
+        print(reply)
         d = reply.decode().split(":")
         return int(d[0]), int(d[1])
         # return int(val.decode()) # can be int because will be an int id
@@ -71,8 +72,8 @@ class Network:
             pass
     
     def receive(self):
-        reply = self.client.recv(19)
-        print("reply", reply)
+        reply = self.client.recv(util.MAX_SIZE)
+        #print("reply", reply)
         reply = reply.decode()
         return reply
         

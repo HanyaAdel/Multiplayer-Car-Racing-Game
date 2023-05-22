@@ -19,6 +19,10 @@ server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 server.bind((host, port))
 server.listen()
 
+class Chat:
+    def __init__(self):
+        pass
+
 class Session:
     
     # Lists For Clients and Their Nicknames
@@ -45,19 +49,19 @@ class Session:
     
     def remove_client(self, idx):
         #client['client'].close()
-        print("beginning of remove client")
+        #print("beginning of remove client")
         toBeDeleted_id = self.players[idx]['id']
         self.clients.pop(idx)
-        print("in first pop")
+        #print("in first pop")
         
         self.players.pop(idx)
         
-        print("from send ", idx)
+        #print("from send ", idx)
 
-        print("boradcasting player leave", toBeDeleted_id)
+        #print("boradcasting player leave", toBeDeleted_id)
         message = f"LEFT:{toBeDeleted_id}"
         self.broadcast(message=message)
-        print("after broadcast")
+        #print("after broadcast")
     
     def sender_thread(self):
         while True:
@@ -91,7 +95,7 @@ class Session:
             return d[0], int(d[1]), int(d[2]), int(d[3])
         except Exception as e:
             print("exception from parse data ", e)
-            print(d)
+            #print(d)
 
         
     def get_client_idx_by_socket(self, client):
@@ -107,8 +111,19 @@ class Session:
                 return player_idx
         
         return -1
-
-    def player_handle(self,client):
+    def getHeader(self, data):
+            try:
+                d = data.split(":")
+                return d[0]
+            except:
+                pass
+    def parse_message(self, message):
+        try:
+            d = message.split(":")
+            return d[1]
+        except:
+            pass
+    def receiver_thread(self,client):
         x, y = (10,10)
         
         while True:
@@ -133,24 +148,61 @@ class Session:
         print("Connection Closed")
         client.close()
 
+
+    # Handling Messages From Clients
+    def chat_handle(self, client):
+        while True:
+            #print("Session id", self.session_id)
+            
+            try:
+                # Broadcasting Messages
+                message = client.recv(1024).decode('ascii')
+                header = self.getHeader(message)
+                if (header != "MESSAGE"):
+                    continue
+                message = self.parse_message(message)
+                print(self.clients)
+                index = self.get_client_idx_by_socket(client)
+                #index = self.clients.index(client)
+                name = self.players[index]['name']
+                #nickname = self.nicknames[index]
+                
+                self.broadcast('MESSAGE:{}: {}'.format(name, message))
+                #self.broadcast(message)
+            except:
+                # # Removing And Closing Clients
+                # index = self.clients.index(client)
+                # self.remove_client()
+                # self.clients.remove(client)
+                # client.close()
+                # name = self.players[index]
+                index = self.get_client_idx_by_socket(client)
+                name = self.players[index]['name']                
+                self.broadcast('{} left!'.format(name))
+
+                #self.nicknames.remove(nickname)
+                break
+
+
  
     def add_client(self, client):
         
-
         # Request And Store Nickname
-        #client.send('NICK'.encode('ascii'))
-        # nickname = client.recv(1024).decode('ascii')
+        name = client.recv(1024).decode('ascii')  
 
-        # self.nicknames.append(nickname)
-        print("adding client in session", self.session_id)
+        #print("adding client in session", self.session_id)
         self.clients.append({ 'id': self.current_id, 'client': client })
-        self.players.append({'id':self.current_id, 'x':0, 'y':0})
+        self.players.append({'id':self.current_id, 'name': name,'x':0, 'y':0})
+
         message = f"{self.current_id}:{len(self.players)}"
         client.send(str.encode(str(message))) 
 
 
-        self.thread = threading.Thread(target=self.player_handle, args=(client,))
+        self.thread = threading.Thread(target=self.receiver_thread, args=(client,))
         self.thread.start()  
+
+        self.chat_thread = threading.Thread(target=self.chat_handle, args=(client,))
+        self.chat_thread.start()  
         self.current_id += 1
 
 
@@ -172,7 +224,7 @@ def create_session():
             newSession = client.recv(1024).decode('ascii')
 
             # newSession.add_client(client=client)
-            print(newSession)
+            #print(newSession)
             if newSession == 'yes':
                 # start new session
                 newSession = Session(id=len(sessions))
