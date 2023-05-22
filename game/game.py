@@ -113,8 +113,12 @@ def main(name):
 
     sendThread = threading.Thread(target=sender_thread)
     receiveThread = threading.Thread(target=receiver_thread)
+    chatSendThread = threading.Thread(target=write)
+    chatReceiveThread = threading.Thread(target=receive)
     sendThread.start()
     receiveThread.start()
+    chatSendThread.start()
+    chatReceiveThread.start()
 
     while num_players<len(players):
         continue
@@ -184,7 +188,7 @@ def sender_thread():
         player_idx = get_player_idx_by_id(id=current_id)
         player = players[player_idx]
         reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
-        server.send(reply)
+        server.send_game(reply)
 
 def parse_location(data):
         try:
@@ -218,9 +222,9 @@ def receiver_thread():
     # clock = pygame.time.Clock()
     while True:
         try:
-            data = server.receive()
+            data = server.receive_game()
             if not data:
-                print("empty reply")
+                # print("empty reply")
                 #server.send("Goodbye")
                 continue
             else:
@@ -250,6 +254,25 @@ def receiver_thread():
                             pass
         except:
             break
+
+def receive():
+    global server
+    while True:
+        try:
+            message = server.chat_client.recv(1024).decode()
+            print(message)
+        except:
+            # Close Connection When Error
+            print("An error occured!")
+            server.chat_client.close()
+            break
+
+# Sending Messages To Server
+def write():
+    global server
+    while True:
+        message = input('')
+        server.chat_client.send(message.encode('ascii'))
 
 
 # get users name
