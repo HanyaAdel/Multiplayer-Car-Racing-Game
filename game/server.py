@@ -4,6 +4,7 @@ import random
 import socket
 import threading
 import time
+# import util
 
 # Connection Data
 host = ''
@@ -42,12 +43,6 @@ class Session:
         y = random.randrange(0,H)
         return (x,y)
     
-    # def check_socket_connected(self, sock):
-    #     data = sock.recv(16, socket.MSG_DONTWAIT | socket.MSG_PEEK)
-    #     if len(data) == 0:
-    #         return False
-    #     return True
-    
     def remove_client(self, idx):
         #client['client'].close()
         print("beginning of remove client")
@@ -70,19 +65,13 @@ class Session:
             # print("session id:",self.session_id)
             # print(self.players)
             for idx , client in enumerate(self.clients):
-                # connected = self.check_socket_connected(client['client'])
-                # if not connected:
-                #     self.remove_client(idx=idx)
-                #     continue
 
                 # print("in for loop kbera, ", idx)
-                client_id = client["id"]
                 try:
                     for player in self.players:
                         player_id = player['id']
-                        # if player_id == client_id:
-                        #     continue
                         reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}"
+                        # reply = util.fill_data(reply)
                         while len(reply)<19:
                             reply+=' '
                         #print("sending ", reply, "to", client)
@@ -91,13 +80,6 @@ class Session:
                     print("in exception")
                     self.remove_client(idx=idx)
 
-                    # reply = f"LEFT:{player_id}"
-                    # while len(reply) < 19:
-                    #     reply += ' '
-                    #self.broadcast(reply) 
-                    #nickname = self.nicknames[idx]
-                    # send to other players that player left
-                    #self.nicknames.remove(nickname)
                     break
 
             time.sleep(16/1000)
@@ -147,15 +129,6 @@ class Session:
                         self.players[idx]['y'] = y
             except Exception as e:
                 print (e)
-                # idx = self.get_client_idx_by_socket(client)
-                # if (idx != -1):
-                #     print(idx)
-                #     self.clients.pop(idx)
-                #     self.players.pop(idx)   
-
-                # reply = f"LEFT:{player_id}"
-                # while len(reply) < 19:
-                #     reply += ' '
                 break            
         print("Connection Closed")
         client.close()

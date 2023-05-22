@@ -4,7 +4,7 @@
 import contextlib
 with contextlib.redirect_stdout(None):
     import pygame
-from client import Network
+from network import Network
 import random
 import threading
 import os
@@ -27,7 +27,6 @@ COLORS = [(255,0,0), (255, 128, 0), (255,255,0), (128,255,0),(0,255,0),(0,255,12
 current_id = 0
 server = None
 players = []
-# balls = []
 
 # FUNCTIONS
 def convert_time(t):
@@ -156,11 +155,6 @@ def main(name):
             if player["y"] + vel + PLAYER_RADIUS <= H:
                 player["y"] = player["y"] + vel
 
-        # data = str(current_id) + " " +str(player["x"]) + " " + str(player["y"])
-        data = player
-
-        # send data to server and recieve back all players information
-        # players = server.send(data, True)
 
         for event in pygame.event.get():
             # if user hits red x button close window
@@ -198,7 +192,7 @@ def parse_location(data):
             return int(d[1]), int(d[2]), int(d[3])
         except:
             pass
-def parse_left(data):
+def parse_leaving_player(data):
     try:
         d = data.split(":")
         return int(d[1])
@@ -245,7 +239,7 @@ def receiver_thread():
                     
 
                 if header == "LEFT":
-                    id = parse_left(reply)
+                    id = parse_leaving_player(reply)
                     print("player ", id, " left the game")
                     print(players)
                     deleted_player_idx = get_player_idx_by_id(id)

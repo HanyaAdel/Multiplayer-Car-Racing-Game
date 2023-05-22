@@ -1,5 +1,6 @@
 import socket
 import  pickle
+import util
 
 
 class Network:
@@ -11,7 +12,6 @@ class Network:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
-        #self.client.settimeout(10.0)
         self.host = '98.66.137.14'
         self.port = 55555
         self.addr = (self.host, self.port)
@@ -61,31 +61,16 @@ class Network:
         :return: str
         """
         try:
-            # if pick:
-            #     self.client.send(pickle.dumps(data))
-            # else:
-            while (len(data) < 19):
-                data += ' '
+            data = util.fill_data(data)
+            # while (len(data) < 19):
+            #     data += ' '
             self.client.send(str.encode(data))
 
-            # reply = self.client.recv(2048*4)
-            # try:
-            #     reply = pickle.loads(reply)
-            # except Exception as e:
-            #     print(e)
-
-            # return reply
         except socket.error as e:
             print(e)
             pass
     
     def receive(self):
-        # try:
-
-        # except Exception as e:
-        #     print(e)
-        #     self.client.close()
-
         reply = self.client.recv(19)
         print("reply", reply)
         reply = reply.decode()
