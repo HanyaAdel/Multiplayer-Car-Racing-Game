@@ -26,6 +26,8 @@ COLORS = [(255,0,0), (255, 128, 0), (255,255,0), (128,255,0),(0,255,0),(0,255,12
 # Dynamic Variables
 current_id = 0
 server = None
+game_conn = None
+chat_conn = None
 players = []
 
 # FUNCTIONS
@@ -99,11 +101,13 @@ def main(name):
     :param players: a list of dicts represting a player
     :return: None
     """
-    global players, current_id, server
+    global players, current_id, server, game_conn, chat_conn
 
     # start by connecting to the network
     server = Network()
-    current_id, num_players = server.connect(name)
+    # current_id, num_players = server.connect(name)
+    game_conn, chat_conn = server.connect(name)
+    current_id, num_players = game_conn.getInitialGameData()
     players.append({'id':current_id, 'x':0, 'y':0})
     # for i in range(current_id+1):
     #     players.append({'id':i, 'x':0, 'y':0})
@@ -177,18 +181,24 @@ def main(name):
 
 
     server.disconnect()
+    game_conn.disconnect()
+    chat_conn.disconnect()
     pygame.quit()
     quit()
 
 def sender_thread():
-    global current_id, server
+    global current_id, game_conn
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
-        player_idx = get_player_idx_by_id(id=current_id)
-        player = players[player_idx]
-        reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
-        server.send_game(reply)
+        try:
+            player_idx = get_player_idx_by_id(id=current_id)
+            player = players[player_idx]
+            reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
+            game_conn.send_game(reply)
+        except:
+            print("error")
+            break
 
 def parse_location(data):
         try:
@@ -218,11 +228,11 @@ def get_player_idx_by_id(id):
     
     return -1
 def receiver_thread():
-    global current_id, server
+    global current_id, game_conn
     # clock = pygame.time.Clock()
     while True:
         try:
-            data = server.receive_game()
+            data = game_conn.receive_game()
             if not data:
                 # print("empty reply")
                 #server.send("Goodbye")
@@ -254,25 +264,26 @@ def receiver_thread():
                             pass
         except:
             break
+    print("game receive closed")
 
 def receive():
-    global server
+    global chat_conn
     while True:
         try:
-            message = server.chat_client.recv(1024).decode()
+            message = chat_conn.client.recv(1024).decode()
             print(message)
         except:
             # Close Connection When Error
             print("An error occured!")
-            server.chat_client.close()
+            chat_conn.client.close()
             break
 
 # Sending Messages To Server
 def write():
-    global server
+    global chat_conn
     while True:
         message = input('')
-        server.chat_client.send(message.encode('ascii'))
+        chat_conn.client.send(message.encode('ascii'))
 
 
 # get users name
