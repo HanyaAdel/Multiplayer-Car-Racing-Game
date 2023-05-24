@@ -18,17 +18,25 @@ class Network:
         
         self.addr = (HOST, PORT)
 
-    def connect(self, name):
+    def connect(self, username, password):
         """
         connects to server and returns the id of the client that connected
         :param name: str
         :return: int reprsenting id
         """
         self.client.connect(self.addr)
+        self.chat_connection = ChatNetwork(addr=self.addr)
+        self.game_connection = GameNetwork(addr=self.addr)
+
+        self.client.send(username.encode('ascii'))
+        self.client.send(password.encode('ascii'))
+
+        header = self.client.recv(1024).decode('ascii')
+        if header != "SUCCESS":
+            return None, None
+
         
         #the following two lines have to be in that order
-        self.chat_connection = ChatNetwork(addr=self.addr, name=name)
-        self.game_connection = GameNetwork(addr=self.addr)
         # self.client.send(str.encode(name))
 
 
@@ -103,14 +111,14 @@ class GameNetwork:
 
 
 class ChatNetwork:
-    def __init__(self, addr, name):
+    def __init__(self, addr):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
         self.client.connect(addr)
-        print("sending nickname")
-        print(self.client)
-        self.client.send(name.encode('ascii'))
-        print("sent nickname")
+        # print("sending nickname")
+        # print(self.client)
+        # self.client.send(name.encode('ascii'))
+        # print("sent nickname")
         
     def disconnect(self):
         """

@@ -36,10 +36,10 @@ class ChatServer:
                 self.nicknames.remove(nickname)
                 break
     
-    def add_client(self, id, chat_client):
-        print("waiting for nickname")
-        nickname = chat_client.recv(1024).decode('ascii')
-        print("received nickname")
+    def add_client(self, id, chat_client, nickname):
+        # print("waiting for nickname")
+        # nickname = chat_client.recv(1024).decode('ascii')
+        # print("received nickname")
         # print("adding client in session", self.session_id)
         self.nicknames.append(nickname)
         self.clients.append({ 'id': id, 'client': chat_client })

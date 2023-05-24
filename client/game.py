@@ -93,7 +93,7 @@ def redraw_window(players):
     # WIN.blit(text,(10,15 + text.get_height()))
 
 
-def main(name):
+def main(game_conn, chat_conn):
     """
     function for running the game,
     includes the main loop of the game
@@ -101,12 +101,12 @@ def main(name):
     :param players: a list of dicts represting a player
     :return: None
     """
-    global players, current_id, server, game_conn, chat_conn
+    global players, current_id, server
 
-    # start by connecting to the network
-    server = Network()
-    # current_id, num_players = server.connect(name)
-    game_conn, chat_conn = server.connect(name)
+    # # start by connecting to the network
+    # server = Network()
+    # # current_id, num_players = server.connect(username)
+    # game_conn, chat_conn = server.connect(username, password)
     current_id, num_players = game_conn.getInitialGameData()
     players.append({'id':current_id, 'x':0, 'y':0})
     # for i in range(current_id+1):
@@ -287,12 +287,29 @@ def write():
 
 
 # get users name
+username, password = "", ""
 while True:
-     name = input("Please enter your name: ")
-     if  0 < len(name) < 20:
-         break
-     else:
-         print("Error, this name is not allowed (must be between 1 and 19 characters [inclusive])")
+    username = input ("Please enter your username")
+    password = input ("Please enter your password")
+
+    
+
+    if len(password) == 0 or len(username) == 0:
+        print("Error, password cannot be empty")
+    else: 
+        server = Network()
+        game_conn, chat_conn = server.connect(username, password)
+
+        if (not game_conn or not chat_conn):
+            print("Error, incorrect username or password")
+        else:            
+            break
+
+    # name = input("Please enter your name: ")
+    # if  len(email) == 0:
+    #     break
+    # else:
+    #     print("Error, this username is not allowed (must be between 1 and 19 characters [inclusive])")
 
 # make window start in top left hand corner
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,30)
@@ -302,4 +319,4 @@ WIN = pygame.display.set_mode((W,H))
 pygame.display.set_caption("Blobs")
 
 # start game
-main(name)
+main(game_conn, chat_conn)

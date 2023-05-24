@@ -8,7 +8,7 @@ class Session:
         self.game_server = GameServer()
         self.chat_server = ChatServer()
 
-    def add_client(self, game_client, chat_client):
-        self.game_server.add_client(id=self.current_id,game_client=game_client)
+    def add_client(self, game_client, chat_client, name):
+        self.game_server.add_client(id=self.current_id,game_client=game_client, nickname = name)
         self.chat_server.add_client(id=self.current_id, chat_client=chat_client)
         self.current_id += 1
