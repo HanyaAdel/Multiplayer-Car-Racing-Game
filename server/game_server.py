@@ -5,24 +5,25 @@ import random
 W, H = 1600, 830
 
 class GameServer:
-    def __init__(self):
-        self.clients = []
-        self.players = []
+    def __init__(self,session):
+        self.session = session
+        # self.session.game_clients = []
+        # self.session.players = []
         self.senderThread = threading.Thread(target=self.sender_thread, args=())
         self.senderThread.start()
-    
+
     def broadcast(self, message):
-        for client in self.clients:
+        for client in self.session.game_clients:
             client['client'].send(str.encode(message))
 
     def remove_client(self, idx):
         #client['client'].close()
         print("beginning of remove client")
-        toBeDeleted_id = self.players[idx]['id']
-        self.clients.pop(idx)
+        toBeDeleted_id = self.session.players[idx]['id']
+        self.session.game_clients.pop(idx)
         print("in first pop")
         
-        self.players.pop(idx)
+        self.session.players.pop(idx)
         
         print("from send ", idx)
 
@@ -30,16 +31,18 @@ class GameServer:
         message = f"LEFT:{toBeDeleted_id}"
         self.broadcast(message=message)
         print("after broadcast")
+        print("removing client from session")
+        self.session.remove_client()
 
     def sender_thread(self):
         while True:
             # print(self.clients)
             # print("session id:",self.session_id)
             # print(self.players)
-            for idx , client in enumerate(self.clients):
+            for idx , client in enumerate(self.session.game_clients):
                 # print("in for loop kbera, ", idx)
                 try:
-                    for player in self.players:
+                    for player in self.session.players:
                         player_id = player['id']
                         reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}"
                         # reply = util.fill_data(reply)
@@ -65,13 +68,13 @@ class GameServer:
 
         
     def get_client_idx_by_socket(self, client):
-        for client_idx, client_itr in enumerate(self.clients):
+        for client_idx, client_itr in enumerate(self.session.game_clients):
             if client_itr['client'] == client:
                 return client_idx
         return -1
     
     def get_player_idx_by_id(self, id):
-        for player_idx, player in enumerate(self.players):
+        for player_idx, player in enumerate(self.session.players):
             if player['id'] == id:
                 return player_idx
         return -1
@@ -93,18 +96,18 @@ class GameServer:
                         if (idx == -1):
                             continue
                         # print("in location condition")
-                        self.players[idx]['x'] = x
-                        self.players[idx]['y'] = y
+                        self.session.players[idx]['x'] = x
+                        self.session.players[idx]['y'] = y
             except Exception as e:
                 print (e)
                 break            
         print("Connection Closed")
         client.close()
 
-    def add_client(self, id, game_client):
-        self.clients.append({ 'id': id, 'client': game_client })
-        self.players.append({'id': id, 'x':0, 'y':0})
-        message = f"{id}:{len(self.players)}"
+    def add_client(self, id, game_client, score):
+        self.session.game_clients.append({ 'id': id, 'client': game_client })
+        self.session.players.append({'id': id, 'x':0, 'y':0, 'score':score})
+        message = f"{id}:{len(self.session.players)}"
         game_client.send(str.encode(str(message))) 
         self.client_thread = threading.Thread(target=self.player_handle, args=(game_client,))
         self.client_thread.start()

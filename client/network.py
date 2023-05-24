@@ -2,6 +2,7 @@ import socket
 import  pickle
 import util
 
+# HOST = 'localhost'
 HOST = '98.66.137.14'
 PORT = 55555
 
@@ -28,8 +29,8 @@ class Network:
         self.chat_connection = ChatNetwork(addr=self.addr)
         self.game_connection = GameNetwork(addr=self.addr)
 
-        self.client.send(username.encode('ascii'))
-        self.client.send(password.encode('ascii'))
+        self.client.send(f"{username}:{password}".encode('ascii'))
+        # self.client.send(password.encode('ascii'))
 
         header = self.client.recv(1024).decode('ascii')
         if header != "SUCCESS":

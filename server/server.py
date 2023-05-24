@@ -2,7 +2,7 @@ import socket
 import threading
 from time import sleep
 from session import Session
-import model
+from model import Model
 
 # Connection Data
 host = ''
@@ -17,19 +17,33 @@ server.listen()
 
 sessions = []
 
+def parse_username_and_password(data):
+        try:
+            d = data.split(":")
+            return d[0], d[1]
+        except:
+            pass
+
+def get_session_by_code(code):
+    for session in sessions:
+        if session.session_code == code:
+            return session
+    return None
+    
+
 def handle_incoming_connection(client, address):
     print("Connected with {}".format(str(address)))
     chat_client, chat_address = server.accept()
     game_client, game_address = server.accept()
 
     print("created game and chat clients")
-    username = client.recv(1024).decode('ascii')
-    print("received username")
-    password = client.recv(1024).decode('ascii')
-    print("received password")
+    username, password = parse_username_and_password(client.recv(1024).decode('ascii'))
+    print("received username", username)
+    # password = client.recv(1024).decode('ascii')
+    print("received password", password)
 
-    res = model.login(username, password)
-    if res == False:
+    client_id = model.login(username, password)
+    if client_id == None:
         client.send("FAILED".encode('ascii'))
         client.close()
         game_client.close()
@@ -53,18 +67,23 @@ def handle_incoming_connection(client, address):
 
     if newSession == 'yes':
         # start new session
-        newSession = Session(id=len(sessions))
+        newSession = Session(model=model)
         sessions.append(newSession)
-        newSession.add_client(game_client=game_client, chat_client=chat_client, name=username)
+        newSession.add_client(game_client=game_client, chat_client=chat_client, username=username, client_id=client_id)
 
     if newSession == 'no':
         # client.send('SESSION_NUM'.encode('ascii'))
-        sessionNum = client.recv(1024).decode('ascii')
-        session = sessions[int(sessionNum)]
-        session.add_client(game_client, chat_client, name = username)
+        sessionCode = client.recv(1024).decode('ascii')
+        session = get_session_by_code(code=sessionCode)
+        if session == None:
+            #TODO
+            pass
+        else:
+            session.add_client(game_client, chat_client, username = username, client_id=client_id)
     
     client.close()
     print("closing incoming connection handler")
+
 
 # Receiving / Listening Function
 def listen():
@@ -75,4 +94,5 @@ def listen():
         handler_thread.start()
         sleep(1)
             
+model = Model()
 listen()
