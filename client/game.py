@@ -338,7 +338,6 @@ username, password = "", ""
 while True:
     username = input ("Please enter your username")
     password = input ("Please enter your password")
-
     if len(password) == 0 or len(username) == 0:
         print("Error, password cannot be empty")
     else: 
