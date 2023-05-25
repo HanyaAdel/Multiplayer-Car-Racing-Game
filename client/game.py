@@ -1,6 +1,6 @@
 # small network game that has differnt blobs
 # moving around the screen
-
+from time import sleep
 import contextlib
 with contextlib.redirect_stdout(None):
     import pygame
@@ -15,7 +15,24 @@ PLAYER_RADIUS = 10
 START_VEL = 9
 BALL_RADIUS = 5
 
-W, H = 500, 500
+W, H = 1300, 600
+
+lane_width = W/3
+#Background
+bgImg = pygame.image.load("background.jpg")
+# bg_x1 = (W / 2) - (360 / 2)
+# bg_x2 = (W / 2) - (360 / 2)
+bg_x1 = 0
+bg_x2 = 0
+bg_y1 = 0
+bg_y2 = -600
+bg_speed = 3
+count = 0
+
+#clock 
+clock = pygame.time.Clock()
+
+
 
 NAME_FONT = pygame.font.SysFont("comicsans", 20)
 TIME_FONT = pygame.font.SysFont("comicsans", 30)
@@ -60,6 +77,20 @@ def redraw_window(players):
     :return: None
     """
     WIN.fill((255,255,255)) # fill screen white, to clear old frames
+    global bg_y1, bg_y2, bg_speed, bgImg
+    WIN.blit(bgImg, (bg_x1, bg_y1))
+    WIN.blit(bgImg, (bg_x2, bg_y2))
+
+    bg_y1 += bg_speed
+    bg_y2 += bg_speed
+
+    if bg_y1 >= H:
+            bg_y1 = -600
+
+    if bg_y2 >= H:
+           bg_y2 = -600
+
+
     
         # draw all the orbs/balls
     # for ball in balls:
@@ -108,7 +139,9 @@ def main(game_conn, chat_conn):
     # # current_id, num_players = server.connect(username)
     # game_conn, chat_conn = server.connect(username, password)
     current_id, num_players = game_conn.getInitialGameData()
-    players.append({'id':current_id, 'x':0, 'y':0})
+    lane_number = 1
+    x = (2*lane_number-1)*lane_width/2
+    players.append({'id':current_id, 'x':x, 'y':H})
     # for i in range(current_id+1):
     #     players.append({'id':i, 'x':0, 'y':0})
 
@@ -163,6 +196,11 @@ def main(game_conn, chat_conn):
             if player["y"] + vel + PLAYER_RADIUS <= H:
                 player["y"] = player["y"] + vel
 
+        if player["x"] < 80+(lane_number-1)*lane_width or player["x"] > 360+(lane_number-1)*lane_width:
+            #if user hits the boundaries
+            display_message("Collision !!!")
+
+
 
         for event in pygame.event.get():
             # if user hits red x button close window
@@ -178,13 +216,22 @@ def main(game_conn, chat_conn):
         # redraw window then update the frame
         redraw_window(players)
         pygame.display.update()
-
+        clock.tick(60)
 
     server.disconnect()
     game_conn.disconnect()
     chat_conn.disconnect()
     pygame.quit()
     quit()
+
+def display_message(msg):
+        font = pygame.font.SysFont("comicsansms", 72, True)
+        text = font.render(msg, True, (255, 255, 255))
+        WIN.blit(text, (400 - text.get_width() // 2, 240 - text.get_height() // 2))
+        # self.display_credit()
+        pygame.display.update()
+        # self.clock.tick(60)
+        sleep(1)
 
 def sender_thread():
     global current_id, game_conn
@@ -291,8 +338,6 @@ username, password = "", ""
 while True:
     username = input ("Please enter your username")
     password = input ("Please enter your password")
-
-    
 
     if len(password) == 0 or len(username) == 0:
         print("Error, password cannot be empty")
