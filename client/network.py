@@ -30,34 +30,32 @@ class Network:
         self.game_connection = GameNetwork(addr=self.addr)
 
         self.client.send(f"{username}:{password}".encode('ascii'))
-        # self.client.send(password.encode('ascii'))
 
         header = self.client.recv(1024).decode('ascii')
         if header != "SUCCESS":
             return None, None
 
-        
-        #the following two lines have to be in that order
-        # self.client.send(str.encode(name))
+        new_session = ""
+        while (new_session != "yes" and new_session != "no" ):
+            new_session = input("Do you want to start a new session? enter yes or no \n")
+            new_session = new_session.lower()
 
-
-        new_session = input("Do you want to start a new session? yes, no ")
         self.client.send(new_session.encode('ascii'))
+        
+
+        
 
         if new_session == 'no':
-            # message = self.client.recv(1024).decode('ascii')
-            session_num = input("Enter session number: ")
-            self.client.send(session_num.encode('ascii'))
+            valid_session = False
+            while not valid_session:
+                # message = self.client.recv(1024).decode('ascii')
+                session_num = input("Enter session number: ")
+                self.client.send(session_num.encode('ascii'))
+                header = self.client.recv(1024).decode('ascii')
+                print (header)
+                if header != 'FAIL':
+                    valid_session = True
 
-        # If 'NICK' Send Nickname
-        # message = client.recv(1024).decode('ascii')
-        # nickname = input("Choose your nickname: ")
-        
-
-        # reply = self.game_client.recv(5)
-        # d = reply.decode().split(":")
-        # return int(d[0]), int(d[1])
-        # return int(val.decode()) # can be int because will be an int id
         return self.game_connection, self.chat_connection
 
     def disconnect(self):

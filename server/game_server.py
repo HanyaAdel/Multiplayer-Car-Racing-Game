@@ -92,6 +92,8 @@ class GameServer:
         self.session.game_clients.append({ 'id': id, 'client': game_client })
         self.session.players.append({'id': id, 'x':0, 'y':0, 'score':score})
         message = f"{id}:{len(self.session.players)}"
+        while len(message) < 5:
+            message += ' '
         game_client.send(str.encode(str(message))) 
         self.client_thread = threading.Thread(target=self.player_handle, args=(game_client,))
         self.client_thread.start()

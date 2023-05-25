@@ -61,14 +61,16 @@ def handle_incoming_connection(client, address):
         newSession.add_client(game_client=game_client, chat_client=chat_client, username=username, client_id=client_id)
 
     if newSession == 'no':
-        # client.send('SESSION_NUM'.encode('ascii'))
-        sessionCode = client.recv(1024).decode('ascii')
-        session = util.get_session_by_code(code=sessionCode, sessions = sessions)
-        if session == None:
-            #TODO
-            pass
-        else:
-            session.add_client(game_client, chat_client, username = username, client_id=client_id)
+        # receive the session code from the client and add the player to that session.
+        session = None
+        while not session:
+            sessionCode = client.recv(1024).decode('ascii')
+            session = util.get_session_by_code(code=sessionCode, sessions = sessions)
+            if session == None:
+                client.send("FAIL".encode('ascii'))
+                pass
+        #else:
+        session.add_client(game_client, chat_client, username = username, client_id=client_id)
     
     client.close()
     print("closing incoming connection handler")
