@@ -3,6 +3,7 @@ import threading
 from time import sleep
 from session import Session
 from model import Model
+import util
 
 # Connection Data
 host = ''
@@ -17,19 +18,7 @@ server.listen()
 
 sessions = []
 
-def parse_username_and_password(data):
-        try:
-            d = data.split(":")
-            return d[0], d[1]
-        except:
-            pass
 
-def get_session_by_code(code):
-    for session in sessions:
-        if session.session_code == code:
-            return session
-    return None
-    
 
 def handle_incoming_connection(client, address):
     print("Connected with {}".format(str(address)))
@@ -37,7 +26,7 @@ def handle_incoming_connection(client, address):
     game_client, game_address = server.accept()
 
     print("created game and chat clients")
-    username, password = parse_username_and_password(client.recv(1024).decode('ascii'))
+    username, password = util.parse_username_and_password(client.recv(1024).decode('ascii'))
     print("received username", username)
     # password = client.recv(1024).decode('ascii')
     print("received password", password)
@@ -74,7 +63,7 @@ def handle_incoming_connection(client, address):
     if newSession == 'no':
         # client.send('SESSION_NUM'.encode('ascii'))
         sessionCode = client.recv(1024).decode('ascii')
-        session = get_session_by_code(code=sessionCode)
+        session = util.get_session_by_code(code=sessionCode, sessions = sessions)
         if session == None:
             #TODO
             pass

@@ -1,6 +1,7 @@
 import threading
 import time
 import random
+import util
 
 W, H = 1600, 830
 
@@ -11,11 +12,7 @@ class GameServer:
         # self.session.players = []
         self.senderThread = threading.Thread(target=self.sender_thread, args=())
         self.senderThread.start()
-
-    def broadcast(self, message):
-        for client in self.session.game_clients:
-            client['client'].send(str.encode(message))
-
+    
     def remove_client(self, idx):
         #client['client'].close()
         print("beginning of remove client")
@@ -29,7 +26,7 @@ class GameServer:
 
         print("boradcasting player leave", toBeDeleted_id)
         message = f"LEFT:{toBeDeleted_id}"
-        self.broadcast(message=message)
+        util.broadcast(message=message, clients=self.session.game_clients)
         print("after broadcast")
         print("removing client from session")
         self.session.remove_client()
@@ -66,19 +63,6 @@ class GameServer:
             print("exception from parse data ", e)
             print(d)
 
-        
-    def get_client_idx_by_socket(self, client):
-        for client_idx, client_itr in enumerate(self.session.game_clients):
-            if client_itr['client'] == client:
-                return client_idx
-        return -1
-    
-    def get_player_idx_by_id(self, id):
-        for player_idx, player in enumerate(self.session.players):
-            if player['id'] == id:
-                return player_idx
-        return -1
-
     def player_handle(self,client):
         x, y = (10,10)
         
@@ -92,7 +76,7 @@ class GameServer:
                     reply = data.decode()
                     header, id, x, y = self.parse_data(reply)
                     if header == "LOCATION":
-                        idx = self.get_player_idx_by_id(id)
+                        idx = util.get_player_idx_by_id(id, self.session.players)
                         if (idx == -1):
                             continue
                         # print("in location condition")
