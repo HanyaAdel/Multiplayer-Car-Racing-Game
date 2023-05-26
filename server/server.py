@@ -28,7 +28,7 @@ def handle_incoming_connection(client, address):
     print("created game and chat clients")
     username, password = util.parse_username_and_password(client.recv(1024).decode('ascii'))
     print("received username", username)
-    # password = client.recv(1024).decode('ascii')
+
     print("received password", password)
 
     client_id = model.login(username, password)
@@ -44,14 +44,10 @@ def handle_incoming_connection(client, address):
         client.send("SUCCESS".encode('ascii'))
         print("in success")
 
-    # chat_client, chat_address = server.accept()
-    # game_client, game_address = server.accept()
 
 
-    # Request And Store Nickname
-    # client.send('NEW_SESSION'.encode('ascii'))
     newSession = client.recv(1024).decode('ascii')
-    # newSession.add_client(client=client)
+
     print(newSession)
 
     if newSession == 'yes':

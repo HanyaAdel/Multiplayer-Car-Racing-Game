@@ -9,7 +9,7 @@ class Session:
         self.numPlayers = 0
         self.game_clients = []
         self.chat_clients = []
-        self.nicknames = []
+
         self.players = []
         self.session_code = model.addSession()
         self.game_server = GameServer(session = self)
@@ -20,11 +20,13 @@ class Session:
     def add_client(self, game_client, chat_client, username, client_id):
         score = self.model.addPlayerToSession(player_id = client_id, session_code = self.session_code)
         print(f"{username}'s score is {score}")
-        self.game_server.add_client(id=client_id,game_client=game_client, score=score)
-        self.chat_server.add_client(id=client_id, chat_client=chat_client, username = username)
+        self.players.append({'id': client_id, 'x':0, 'y':0, 'score':score, 'name':username})
+        self.game_server.add_client(id=client_id,game_client=game_client)
+        self.chat_server.add_client(id=client_id, chat_client=chat_client)
         self.numPlayers += 1
 
-    def remove_client(self):
+    def remove_client(self, idx):
+        self.players.pop(idx)
         print("in session remove client")
         self.numPlayers -= 1
         if self.numPlayers == 0:

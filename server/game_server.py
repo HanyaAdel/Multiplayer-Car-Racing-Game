@@ -8,19 +8,17 @@ W, H = 1600, 830
 class GameServer:
     def __init__(self,session):
         self.session = session
-        # self.session.game_clients = []
-        # self.session.players = []
         self.senderThread = threading.Thread(target=self.sender_thread, args=())
         self.senderThread.start()
     
     def remove_client(self, idx):
-        #client['client'].close()
+
         print("beginning of remove client")
         toBeDeleted_id = self.session.players[idx]['id']
         self.session.game_clients.pop(idx)
         print("in first pop")
         
-        self.session.players.pop(idx)
+
         
         print("from send ", idx)
 
@@ -29,13 +27,11 @@ class GameServer:
         util.broadcast(message=message, clients=self.session.game_clients)
         print("after broadcast")
         print("removing client from session")
-        self.session.remove_client()
+        self.session.remove_client(idx)
 
     def sender_thread(self):
         while True:
-            # print(self.clients)
-            # print("session id:",self.session_id)
-            # print(self.players)
+
             for idx , client in enumerate(self.session.game_clients):
                 # print("in for loop kbera, ", idx)
                 try:
@@ -88,9 +84,9 @@ class GameServer:
         print("Connection Closed")
         client.close()
 
-    def add_client(self, id, game_client, score):
+    def add_client(self, id, game_client):
         self.session.game_clients.append({ 'id': id, 'client': game_client })
-        self.session.players.append({'id': id, 'x':0, 'y':0, 'score':score})
+        
         message = f"{id}:{len(self.session.players)}"
         while len(message) < 5:
             message += ' '

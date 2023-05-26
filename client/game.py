@@ -141,6 +141,7 @@ def main(game_conn, chat_conn):
     current_id, num_players = game_conn.getInitialGameData()
     lane_number = 1
     x = int((2*lane_number-1)*lane_width/2)
+    # need to add 'score' and 'name' keys 
     players.append({'id':current_id, 'x':x, 'y':H})
     # for i in range(current_id+1):
     #     players.append({'id':i, 'x':0, 'y':0})
@@ -293,6 +294,7 @@ def receiver_thread():
                     if id == current_id:
                         continue
                     elif player_idx == -1:
+                        # need to add 'score' and 'name' keys 
                         players.append({'id':id, 'x':x, 'y':y})
                     else:
                         players[player_idx]['x'] = x
