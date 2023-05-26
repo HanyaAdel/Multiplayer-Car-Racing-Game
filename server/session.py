@@ -10,7 +10,7 @@ class Session:
         self.game_clients = []
         self.chat_clients = []
         self.exist = True
-        self.available_lanes = [1,2,3,4,5]
+        self.available_lanes = [1,2, 3]
 
         self.players = []
         self.session_code = model.addSession()
