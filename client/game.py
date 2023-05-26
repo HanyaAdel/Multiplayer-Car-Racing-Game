@@ -140,7 +140,7 @@ def main(game_conn, chat_conn):
     # game_conn, chat_conn = server.connect(username, password)
     current_id, num_players = game_conn.getInitialGameData()
     lane_number = 1
-    x = (2*lane_number-1)*lane_width/2
+    x = int((2*lane_number-1)*lane_width/2)
     players.append({'id':current_id, 'x':x, 'y':H})
     # for i in range(current_id+1):
     #     players.append({'id':i, 'x':0, 'y':0})
