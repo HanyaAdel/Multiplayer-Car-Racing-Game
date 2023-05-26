@@ -12,8 +12,9 @@ class Model:
     def login(self,username, password):
         query = "SELECT * FROM player where username=%s AND password=%s;"
         result = self.database_manager.get(query=query,args=(username,password,))
-        print("login result",result[0][0])
-        return result[0][0]
+        if len(result):
+            return result[0][0]
+        return None
         
     def generateSessionCode(self):
         ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k = SESSION_CODE_SIZE))
