@@ -1,9 +1,3 @@
-MAX_SIZE = 19
-
-def fill_data(data):
-    while len(data) < MAX_SIZE:
-        data += ' '
-    return data
 
 def receive_data(client):
     header = client.recv(4)
@@ -38,11 +32,11 @@ def send_data(data, client):
     header = message_length.to_bytes(4, byteorder='big')
     client.sendall(header + data.encode('utf-8'))
 
-    
+
 def parse_location(data):
         try:
             d = data.split(":")
-            return int(d[1]), int(d[2]), int(d[3]), int(d[4])
+            return int(d[1]), int(d[2]), int(d[3]), int(d[4]), int(d[5])
         except:
             pass
 def parse_leaving_player(data):

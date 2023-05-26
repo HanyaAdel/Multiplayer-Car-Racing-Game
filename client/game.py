@@ -179,12 +179,12 @@ def main(game_conn, chat_conn):
     
     #private score for each player to be sent to the server
     score = 0
-    current_id, num_players,lane = game_conn.getInitialGameData()
+    current_id, num_players,lane, score= game_conn.getInitialGameData()
     lane_number = lane
     print("lane no: ",lane_number)
     x = int((2*lane_number-1)*lane_width/2)
     # need to add 'score' and 'name' keys 
-    players.append({'id':current_id, 'x':x, 'y':H - car_height, 'lane':lane_number})
+    players.append({'id':current_id, 'x':x, 'y':H - car_height, 'lane':lane_number, 'score': score})
 
 
     sendThread = threading.Thread(target=sender_thread)
@@ -285,14 +285,14 @@ def display_message(msg):
         sleep(1)
 
 def sender_thread():
-    global current_id, game_conn
+    global current_id, game_conn, score
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
         try:
             player_idx = util.get_player_idx_by_id(id=current_id, players=players)
             player = players[player_idx]
-            reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
+            reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}:{score}"
             game_conn.send_game(reply)
         except:
             print("error")
@@ -312,17 +312,18 @@ def receiver_thread():
                 reply = data
                 header = util.getHeader(reply)
                 if (header == "LOCATION"):
-                    id, x, y, lane = util.parse_location(reply)
+                    id, x, y, lane, score = util.parse_location(reply)
                     player_idx = util.get_player_idx_by_id(id=id, players=players)
                     if id == current_id:
                         continue
                     elif player_idx == -1:
                         # need to add 'score' and 'name' keys 
-                        players.append({'id':id, 'x':x, 'y':y, 'lane':lane})
+                        players.append({'id':id, 'x':x, 'y':y, 'lane':lane, 'score': score})
                     else:
                         players[player_idx]['x'] = x
                         players[player_idx]['y'] = y
                         players[player_idx]['lane'] = lane
+                        players[player_idx]['score'] = score
                     
 
                 if header == "LEFT":
@@ -382,7 +383,6 @@ def write_chat_messages():
     while True:
         message = input('')
         util.send_data(message, chat_conn.client)
-        #chat_conn.client.send(message.encode('ascii'))
 
 
 # get users name

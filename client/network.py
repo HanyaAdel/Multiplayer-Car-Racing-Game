@@ -2,8 +2,8 @@ import socket
 import  pickle
 import util
 
-HOST = 'localhost'
-#HOST = '98.66.137.14'
+# HOST = 'localhost'
+HOST = '98.66.137.14'
 PORT = 55555
 
 class Network:
@@ -35,6 +35,7 @@ class Network:
 
         header = util.receive_data(self.client)
         if header != "SUCCESS":
+            print("Login failed, already logged in or incorrect username or password")
             return None, None
 
         new_session = ""
@@ -82,7 +83,7 @@ class GameNetwork:
         reply = util.receive_data(self.client)
         print("message received: ", reply)
         d = reply.split(":")
-        return int(d[0]), int(d[1]), int(d[2])
+        return int(d[0]), int(d[1]), int(d[2]), int(d[3])
     
     def send_game(self, data, pick=False):
         """

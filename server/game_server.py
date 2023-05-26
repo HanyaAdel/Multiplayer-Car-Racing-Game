@@ -39,18 +39,15 @@ class GameServer:
             if counter == 180:
                 counter = 0
                 reply = f"OBSTACLE: {random.randrange(80,240)}"
-                while len(reply)<21:
-                    reply+=' '                
+               
                 util.broadcast(message= reply, clients=self.session.game_clients)
             for idx , client in enumerate(self.session.game_clients):
                 # print("in for loop kbera, ", idx)
                 try:
                     for player in self.session.players:
                         player_id = player['id']
-                        reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}:{player['lane']}"
+                        reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}:{player['lane']}:{player['score']}"
 
-                        # print("sending ", reply)
-                        #client['client'].send(str.encode(reply))
                         self.send_data(reply, client['client'])
                 except:
                     print("in exception")
@@ -64,7 +61,7 @@ class GameServer:
         #print (data)
         try:
             d = data.split(":")
-            return d[0], int(d[1]), int(d[2]), int(d[3])
+            return d[0], int(d[1]), int(d[2]), int(d[3]), int(d[4])
         except Exception as e:
             print("exception from parse data ", e)
             print(d)
@@ -92,13 +89,14 @@ class GameServer:
                     break
                 else:
                     reply = data
-                    header, id, x, y = self.parse_data(reply)
+                    header, id, x, y, score = self.parse_data(reply)
                     if header == "LOCATION":
                         idx = util.get_player_idx_by_id(id, self.session.players)
                         if (idx == -1):
                             continue
                         self.session.players[idx]['x'] = x
                         self.session.players[idx]['y'] = y
+                        self.session.players[idx]['score'] = score
             except Exception as e:
                 print (e)
                 break            
@@ -108,7 +106,7 @@ class GameServer:
     def add_client(self, id, game_client):
         self.session.game_clients.append({ 'id': id, 'client': game_client })
         index = util.get_player_idx_by_id(id, self.session.players)
-        message = f"{id}:{len(self.session.players)}:{self.session.players[index]['lane']}"
+        message = f"{id}:{len(self.session.players)}:{self.session.players[index]['lane']}:{self.session.players[index]['score']}"
 
         self.send_data(message, game_client)
 

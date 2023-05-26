@@ -48,8 +48,8 @@ class Session:
 
     def syncDatabase(self):
         while self.exist:
-            for player in self.players:
-                player['score']+=1
+            # for player in self.players:
+            #     player['score']+=1
             self.model.updateRecords([tuple([d['score'],d['id'],self.session_code]) for d in self.players])
             time.sleep(1) #update records once every second
             

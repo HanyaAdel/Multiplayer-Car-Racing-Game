@@ -19,6 +19,16 @@ server.listen()
 sessions = []
 
 
+def logged_in(id):
+    global sessions
+    for session in sessions:
+        for player in session.players:
+            if player['id'] == id:
+                return True
+            
+    return False
+
+
 
 def handle_incoming_connection(client, address):
     print("Connected with {}".format(str(address)))
@@ -32,7 +42,8 @@ def handle_incoming_connection(client, address):
     print("received password", password)
 
     client_id = model.login(username, password)
-    if client_id == None:
+    
+    if client_id == None or logged_in(client_id) == True:
         util.send_data("FAILED", client)
         client.close()
         game_client.close()
