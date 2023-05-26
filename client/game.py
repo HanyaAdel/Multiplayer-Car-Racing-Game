@@ -17,6 +17,7 @@ START_VEL = 9
 BALL_RADIUS = 5
 BUFFER_SIZE = 1024
 W, H = 1300, 600
+display_width, display_height = 1300, 900
 
 lane_width = W/3
 lane_margin = 80
@@ -238,18 +239,21 @@ def main(game_conn, chat_conn):
         if player["x"] < 80+(lane_number-1)*lane_width or player["x"] > 360+(lane_number-1)*lane_width:
             #if user hits the boundaries
             score -= 100
-            display_message("Collision !! score down!")
+            display_message("Boundary hit !! score down!")
             
+        enemy_car_shifted_startx = enemy_car_startx + (lane_number-1)*lane_width  
         if player["y"] < enemy_car_starty + enemy_car_height:
-            if player["x"] > enemy_car_startx and player["x"] < enemy_car_startx + enemy_car_width or player["x"] + car_width > enemy_car_startx and player["x"] + car_width < enemy_car_startx + enemy_car_width:
+            if player["x"] > enemy_car_shifted_startx and player["x"] < enemy_car_shifted_startx + enemy_car_width or player["x"] + car_width > enemy_car_shifted_startx and player["x"] + car_width < enemy_car_shifted_startx + enemy_car_width:
                     #run = False
-                    display_message("Game Over !!!")
+                    # display_message("Game Over !!!")
+                    score -= 100
+                    display_message("Collision !! score down!")
 
         score += 1
         if (score % 100 == 0):
-            if enemy_car_speed < 100:
+            if enemy_car_speed < 50:
                 enemy_car_speed += 1
-            if bg_speed < 100:
+            if bg_speed < 50:
                 bg_speed += 1
 
         for event in pygame.event.get():
@@ -405,7 +409,7 @@ while True:
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,30)
 
 # setup pygame window
-WIN = pygame.display.set_mode((W,H))
+WIN = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Blobs")
 
 # start game
