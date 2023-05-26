@@ -326,7 +326,8 @@ def write_chat_messages():
     global chat_conn
     while True:
         message = input('')
-        chat_conn.client.send(message.encode('ascii'))
+        util.send_data(message, chat_conn.client)
+        #chat_conn.client.send(message.encode('ascii'))
 
 
 # get users name

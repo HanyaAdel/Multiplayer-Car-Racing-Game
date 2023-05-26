@@ -2,8 +2,8 @@ import socket
 import  pickle
 import util
 
-# HOST = 'localhost'
-HOST = '98.66.137.14'
+HOST = 'localhost'
+#HOST = '98.66.137.14'
 PORT = 55555
 
 class Network:
@@ -26,12 +26,14 @@ class Network:
         :return: int reprsenting id
         """
         self.client.connect(self.addr)
+        
         self.chat_connection = ChatNetwork(addr=self.addr)
         self.game_connection = GameNetwork(addr=self.addr)
 
-        self.client.send(f"{username}:{password}".encode('ascii'))
 
-        header = self.client.recv(1024).decode('ascii')
+        util.send_data(f"{username}:{password}", self.client)
+
+        header = util.receive_data(self.client)
         if header != "SUCCESS":
             return None, None
 
@@ -40,21 +42,26 @@ class Network:
             new_session = input("Do you want to start a new session? enter yes or no \n")
             new_session = new_session.lower()
 
-        self.client.send(new_session.encode('ascii'))
-        
+        util.send_data(new_session, self.client)
 
+        if new_session == 'yes':
+            session_code = util.receive_data(self.client)
+            print (session_code)
         
 
         if new_session == 'no':
             valid_session = False
             while not valid_session:
-                # message = self.client.recv(1024).decode('ascii')
                 session_num = input("Enter session number: ")
-                self.client.send(session_num.encode('ascii'))
-                header = self.client.recv(1024).decode('ascii')
+                util.send_data(session_num, self.client)
+                header = util.receive_data(self.client)
                 print (header)
-                if header != 'FAIL':
+                if header != 'FAIL' and header != "FULL":
                     valid_session = True
+                elif header == "FULL":
+                    print("Session is full. Please enter another session number\n")
+
+        
 
         return self.game_connection, self.chat_connection
 
@@ -72,9 +79,9 @@ class GameNetwork:
         self.client.connect(addr)
         
     def getInitialGameData(self):
-        reply = self.client.recv(7)
+        reply = util.receive_data(self.client)
         print("message received: ", reply)
-        d = reply.decode().split(":")
+        d = reply.split(":")
         return int(d[0]), int(d[1]), int(d[2])
     
     def send_game(self, data, pick=False):
@@ -86,20 +93,16 @@ class GameNetwork:
         :return: str
         """
         try:
-            data = util.fill_data(data)
-            # while (len(data) < 19):
-            #     data += ' '
-            self.client.send(str.encode(data))
+
+            util.send_data(data, self.client)
 
         except socket.error as e:
             print(e)
             raise(e)
-            pass
 
     def receive_game(self):
-        reply = self.client.recv(21)
-        # print("reply", reply)
-        reply = reply.decode()
+
+        reply = util.receive_data(self.client)
         return reply
     
     def disconnect(self):
@@ -115,10 +118,6 @@ class ChatNetwork:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
         self.client.connect(addr)
-        # print("sending nickname")
-        # print(self.client)
-        # self.client.send(name.encode('ascii'))
-        # print("sent nickname")
         
     def disconnect(self):
         """
@@ -136,10 +135,7 @@ class ChatNetwork:
         :return: str
         """
         try:
-            self.client.send(data.encode('ascii'))
-            # while (len(data) < 19):
-            #     data += ' '
-            # self.game_client.send(str.encode(data))
+            util.send_data(data, self.client)
 
         except socket.error as e:
             print(e)
@@ -147,10 +143,9 @@ class ChatNetwork:
     
     def receive_chat(self):
         try:
-            message = self.client.recv(1024).decode('ascii')
+            message = util.receive_data(self.client)
             print(message)
             return message
         except:
             # Close Connection When Error
             print("An error occured!")
-            # client.close()

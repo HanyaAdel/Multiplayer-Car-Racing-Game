@@ -46,14 +46,14 @@ class Database:
     
     def get(self,query,args):
         try:
-            print("in begining of get try")
+            #print("in begining of get try")
             db = self.get_Connection()
             mycursor = db.cursor()
             mycursor.execute(query,args)
             result=mycursor.fetchall()
             db.close()
             self.isOnline = True
-            print("in end of get try")
+            #print("in end of get try")
             return result
         except mysql.connector.errors.InterfaceError:
             self.markAsOffline()
@@ -64,14 +64,14 @@ class Database:
 
     def update(self,query,args):
         try:
-            print("in begining of update try")
+            #print("in begining of update try")
             db = self.get_Connection()
             mycursor = db.cursor()
             mycursor.execute(query,(args))
             db.commit()
             db.close()
             self.isOnline = True
-            print("in end of update try")
+            #print("in end of update try")
         except mysql.connector.errors.InterfaceError:
             self.markAsOffline()
             print ("in update interface exception")
@@ -81,14 +81,14 @@ class Database:
     
     def updateMany(self,query,args):
         try:
-            print("in begining of update many try")
+            #print("in begining of update many try")
             db = self.get_Connection()
             mycursor = db.cursor()
             mycursor.executemany(query,args)
             db.commit()
             db.close()
             self.isOnline = True
-            print("in end of update many try")
+            #print("in end of update many try")
         except mysql.connector.errors.InterfaceError:
             print ("in update many interface exception")
             self.markAsOffline()

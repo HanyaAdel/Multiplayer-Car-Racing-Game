@@ -12,14 +12,13 @@ class ChatServer:
 
             header = message_length.to_bytes(4, byteorder='big')
             client['client'].sendall(header + message.encode('utf-8'))            
-            #client['client'].send(str.encode(message))
 
     def handle_chat(self, client_socket):
         while True:
 
             try:
                 # Broadcasting Messages
-                message = client_socket.recv(1024).decode('ascii')
+                message = util.receive_data(client_socket)
                 index = util.get_client_idx_by_socket(client_socket, self.session.chat_clients)
 
                 name = self.session.players[index]['name']
@@ -53,7 +52,6 @@ class ChatServer:
             to_send = name + ': ' + message_text
             message_length = len(to_send.encode('utf-8'))
 
-            #msg_len = len(message.encode('utf-8'))
 
             header = message_length.to_bytes(4, byteorder='big')
             chat_client.sendall(header + to_send.encode('utf-8'))
