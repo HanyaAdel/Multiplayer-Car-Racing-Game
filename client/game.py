@@ -8,6 +8,7 @@ from network import Network
 import random
 import threading
 import os
+import util
 pygame.font.init()
 
 # Constants
@@ -134,25 +135,18 @@ def main(game_conn, chat_conn):
     """
     global players, current_id, server
 
-    # # start by connecting to the network
-    # server = Network()
-    # # current_id, num_players = server.connect(username)
-    # game_conn, chat_conn = server.connect(username, password)
     current_id, num_players = game_conn.getInitialGameData()
     lane_number = 1
     x = int((2*lane_number-1)*lane_width/2)
     # need to add 'score' and 'name' keys 
     players.append({'id':current_id, 'x':x, 'y':H})
-    # for i in range(current_id+1):
-    #     players.append({'id':i, 'x':0, 'y':0})
 
-    # players = server.send("get")
 
 
     sendThread = threading.Thread(target=sender_thread)
     receiveThread = threading.Thread(target=receiver_thread)
-    chatSendThread = threading.Thread(target=write)
-    chatReceiveThread = threading.Thread(target=receive)
+    chatSendThread = threading.Thread(target=write_chat_messages)
+    chatReceiveThread = threading.Thread(target=receive_chat_messages)
     sendThread.start()
     receiveThread.start()
     chatSendThread.start()
@@ -167,7 +161,7 @@ def main(game_conn, chat_conn):
 
     while run:
         clock.tick(60) # 30 fps max
-        player_idx = get_player_idx_by_id(id=current_id)
+        player_idx = util.get_player_idx_by_id(id=current_id, players=players)
         player = players[player_idx]
         # print(player)
         # print(players)
@@ -240,7 +234,7 @@ def sender_thread():
     while True:
         clock.tick(60)
         try:
-            player_idx = get_player_idx_by_id(id=current_id)
+            player_idx = util.get_player_idx_by_id(id=current_id, players=players)
             player = players[player_idx]
             reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}"
             game_conn.send_game(reply)
@@ -248,33 +242,6 @@ def sender_thread():
             print("error")
             break
 
-def parse_location(data):
-        try:
-            d = data.split(":")
-            return int(d[1]), int(d[2]), int(d[3])
-        except:
-            pass
-def parse_leaving_player(data):
-    try:
-        d = data.split(":")
-        return int(d[1])
-    except:
-        pass    
-
-def getHeader(data):
-        try:
-            d = data.split(":")
-            return d[0]
-        except:
-            pass
-
-def get_player_idx_by_id(id):
-    global players
-    for player_idx, player in enumerate(players):
-        if player['id'] == id:
-            return player_idx
-    
-    return -1
 def receiver_thread():
     global current_id, game_conn
     # clock = pygame.time.Clock()
@@ -287,10 +254,10 @@ def receiver_thread():
                 continue
             else:
                 reply = data
-                header = getHeader(reply)
+                header = util.getHeader(reply)
                 if (header == "LOCATION"):
-                    id, x, y = parse_location(reply)
-                    player_idx = get_player_idx_by_id(id=id)
+                    id, x, y = util.parse_location(reply)
+                    player_idx = util.get_player_idx_by_id(id=id, players=players)
                     if id == current_id:
                         continue
                     elif player_idx == -1:
@@ -302,10 +269,10 @@ def receiver_thread():
                     
 
                 if header == "LEFT":
-                    id = parse_leaving_player(reply)
+                    id = util.parse_leaving_player(reply)
                     print("player ", id, " left the game")
                     print(players)
-                    deleted_player_idx = get_player_idx_by_id(id)
+                    deleted_player_idx = util.get_player_idx_by_id(id, players=players)
                     if (deleted_player_idx != -1):
                         del players[deleted_player_idx]
                     elif(deleted_player_idx == -1):
@@ -315,7 +282,7 @@ def receiver_thread():
             break
     print("game receive closed")
 
-def receive():
+def receive_chat_messages():
     global chat_conn
     while True:
         try:
@@ -328,7 +295,7 @@ def receive():
             break
 
 # Sending Messages To Server
-def write():
+def write_chat_messages():
     global chat_conn
     while True:
         message = input('')
@@ -350,12 +317,6 @@ while True:
             print("Error, incorrect username or password")
         else:            
             break
-
-    # name = input("Please enter your name: ")
-    # if  len(email) == 0:
-    #     break
-    # else:
-    #     print("Error, this username is not allowed (must be between 1 and 19 characters [inclusive])")
 
 # make window start in top left hand corner
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,30)
