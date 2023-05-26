@@ -38,7 +38,7 @@ class GameServer:
             counter += 1
             if counter == 180:
                 counter = 0
-                reply = f"OBSTACLE: {random.randrange(0,280)}"
+                reply = f"OBSTACLE: {random.randrange(80,240)}"
                 while len(reply)<21:
                     reply+=' '                
                 util.broadcast(message= reply, clients=self.session.game_clients)
