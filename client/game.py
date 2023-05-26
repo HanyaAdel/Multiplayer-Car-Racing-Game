@@ -17,7 +17,7 @@ START_VEL = 9
 BALL_RADIUS = 5
 BUFFER_SIZE = 1024
 W, H = 1300, 600
-display_width, display_height = 1300, 900
+display_width, display_height = 1500, 600
 
 lane_width = W/3
 lane_margin = 80
@@ -49,6 +49,7 @@ server = None
 game_conn = None
 chat_conn = None
 players = []
+messages = []
 
 car1Img = pygame.image.load('car1.png')
 car2Img = pygame.image.load('car2.png')
@@ -269,6 +270,7 @@ def main(game_conn, chat_conn):
 
         # redraw window then update the frame
         redraw_window(players, score)
+        display_chat()
         pygame.display.update()
         clock.tick(60)
 
@@ -287,6 +289,32 @@ def display_message(msg):
         pygame.display.update()
         # self.clock.tick(60)
         sleep(1)
+
+def display_chat():
+        x, y = 1300, 0
+        pygame.draw.rect(WIN, (255, 247, 174), (W, 0, 200, 600))
+
+        msg = "Group Chat"
+        font = pygame.font.SysFont("comicsansms", 20, True)
+        text = font.render(msg, True, (0, 0, 0))
+        WIN.blit(text, (x, y))
+        y+=30
+
+        max_len = 20 
+        # msg[i:i+max_len] for i in range(0, len(msg), max_len)
+        for msg in messages:
+            for i in range(0, len(msg), max_len): 
+                sub_msg = msg[i:i+max_len]
+                font = pygame.font.SysFont("arial", 15, True)
+                text = font.render(sub_msg, True, (0, 0, 0))
+                WIN.blit(text, (x, y))
+                y+=25   
+                if y > H:
+                    y-=25
+        # self.display_credit()
+        # pygame.display.update()
+        # # self.clock.tick(60)
+        # sleep(1)
 
 def sender_thread():
     global current_id, game_conn, score
@@ -374,6 +402,7 @@ def receive_chat_messages():
 
             # Print the message
             message = data.decode("utf-8").strip()
+            messages.append(message)
             print(message)            
         except:
             # Close Connection When Error
