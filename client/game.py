@@ -15,7 +15,7 @@ pygame.font.init()
 PLAYER_RADIUS = 10
 START_VEL = 9
 BALL_RADIUS = 5
-
+BUFFER_SIZE = 1024
 W, H = 1300, 600
 
 lane_width = W/3
@@ -135,8 +135,9 @@ def main(game_conn, chat_conn):
     """
     global players, current_id, server
 
-    current_id, num_players = game_conn.getInitialGameData()
-    lane_number = 1
+    current_id, num_players,lane = game_conn.getInitialGameData()
+    lane_number = lane
+    print("lane no: ",lane_number)
     x = int((2*lane_number-1)*lane_width/2)
     # need to add 'score' and 'name' keys 
     players.append({'id':current_id, 'x':x, 'y':H})
@@ -256,16 +257,17 @@ def receiver_thread():
                 reply = data
                 header = util.getHeader(reply)
                 if (header == "LOCATION"):
-                    id, x, y = util.parse_location(reply)
+                    id, x, y, lane = util.parse_location(reply)
                     player_idx = util.get_player_idx_by_id(id=id, players=players)
                     if id == current_id:
                         continue
                     elif player_idx == -1:
                         # need to add 'score' and 'name' keys 
-                        players.append({'id':id, 'x':x, 'y':y})
+                        players.append({'id':id, 'x':x, 'y':y, 'lane':lane})
                     else:
                         players[player_idx]['x'] = x
                         players[player_idx]['y'] = y
+                        players[player_idx]['lane'] = lane
                     
 
                 if header == "LEFT":
@@ -278,6 +280,10 @@ def receiver_thread():
                     elif(deleted_player_idx == -1):
                             print("got -1 in getplayeridxbyid")
                             pass
+                if header == "OBSTACLE":
+                    obstacle_x_location = util.parse_obstacle_location(reply)
+                    print("obstacle: ",obstacle_x_location)
+
         except:
             break
     print("game receive closed")
@@ -286,8 +292,29 @@ def receive_chat_messages():
     global chat_conn
     while True:
         try:
-            message = chat_conn.client.recv(1024).decode()
-            print(message)
+            header = chat_conn.client.recv(4)
+            if not header:
+                break
+
+            # Parse the header
+            msg_len = int.from_bytes(header[0:4], byteorder="big")
+
+            # Receive the message data
+            chunks = []
+            bytes_recd = 0
+            while bytes_recd < msg_len:
+                chunk = chat_conn.client.recv(min(msg_len - bytes_recd,
+                                    BUFFER_SIZE))
+                if not chunk:
+                    raise RuntimeError("ERROR")
+                chunks.append(chunk)
+                bytes_recd += len(chunk)
+
+            data = b"".join(chunks)
+
+            # Print the message
+            message = data.decode("utf-8").strip()
+            print(message)            
         except:
             # Close Connection When Error
             print("An error occured!")

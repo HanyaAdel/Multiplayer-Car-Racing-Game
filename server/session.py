@@ -9,6 +9,8 @@ class Session:
         self.numPlayers = 0
         self.game_clients = []
         self.chat_clients = []
+        self.exist = True
+        self.available_lanes = [1,2,3,4,5]
 
         self.players = []
         self.session_code = model.addSession()
@@ -20,13 +22,19 @@ class Session:
     def add_client(self, game_client, chat_client, username, client_id):
         score = self.model.addPlayerToSession(player_id = client_id, session_code = self.session_code)
         print(f"{username}'s score is {score}")
-        self.players.append({'id': client_id, 'x':0, 'y':0, 'score':score, 'name':username})
+        self.players.append({'id': client_id, 'x':0, 'y':0, 'score':score, 'name':username, 'lane':self.get_lane()})
+        messages = self.model.getSessionMessages(self.session_code)
         self.game_server.add_client(id=client_id,game_client=game_client)
-        self.chat_server.add_client(id=client_id, chat_client=chat_client)
+        self.chat_server.add_client(id=client_id, chat_client=chat_client, messages=messages)
         self.numPlayers += 1
+    
+    def get_lane(self):
+        self.available_lanes.sort()
+        return self.available_lanes.pop(0)
 
     def remove_client(self, idx):
-        self.players.pop(idx)
+        player = self.players.pop(idx)
+        self.available_lanes.append(player['lane'])
         print("in session remove client")
         self.numPlayers -= 1
         if self.numPlayers == 0:
@@ -36,9 +44,10 @@ class Session:
 
     def closeSession(self):
         self.model.deleteSession(self.session_code)
+        self.exist = False
 
     def syncDatabase(self):
-        while True:
+        while self.exist:
             for player in self.players:
                 player['score']+=1
             self.model.updateRecords([tuple([d['score'],d['id'],self.session_code]) for d in self.players])

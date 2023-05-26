@@ -30,16 +30,23 @@ class GameServer:
         self.session.remove_client(idx)
 
     def sender_thread(self):
+        counter = 0
         while True:
-
+            counter += 1
+            if counter == 180:
+                counter = 0
+                reply = f"OBSTACLE: {random.randrange(0,280)}"
+                while len(reply)<21:
+                    reply+=' '                
+                util.broadcast(message= reply, clients=self.session.game_clients)
             for idx , client in enumerate(self.session.game_clients):
                 # print("in for loop kbera, ", idx)
                 try:
                     for player in self.session.players:
                         player_id = player['id']
-                        reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}"
+                        reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}:{player['lane']}"
                         # reply = util.fill_data(reply)
-                        while len(reply)<19:
+                        while len(reply)<21:
                             reply+=' '
                         # print("sending ", reply)
                         client['client'].send(str.encode(reply))
@@ -86,10 +93,11 @@ class GameServer:
 
     def add_client(self, id, game_client):
         self.session.game_clients.append({ 'id': id, 'client': game_client })
-        
-        message = f"{id}:{len(self.session.players)}"
-        while len(message) < 5:
+        index = util.get_player_idx_by_id(id, self.session.players)
+        message = f"{id}:{len(self.session.players)}:{self.session.players[index]['lane']}"
+        while len(message) < 7:
             message += ' '
+        print ("message from server: ", message)
         game_client.send(str.encode(str(message))) 
         self.client_thread = threading.Thread(target=self.player_handle, args=(game_client,))
         self.client_thread.start()

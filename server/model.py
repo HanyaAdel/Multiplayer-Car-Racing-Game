@@ -46,6 +46,11 @@ class Model:
             print("get player score result", result[0][0])
             return result[0][0]
         return None
+    
+    def getSessionMessages(self, session_code):
+        query = "SELECT id_player , message FROM message_in_session where code_session = %s;"
+        result = self.database_manager.get(query=query,args=(session_code,))
+        return result
 
     def addPlayerToSession(self, player_id, session_code):
         score = self.getPlayerScore(player_id=player_id, session_code=session_code)
@@ -58,6 +63,10 @@ class Model:
     def updateRecords(self, players_list):
         query = "UPDATE player_in_session SET score=%s WHERE id_player=%s AND code_session=%s;"
         self.database_manager.updateMany(query=query, args=players_list)
+    
+    def addMessage(self, player_id, session_code, message):
+        query = "INSERT INTO message_in_session (id_player,code_session,message) VALUES (%s,%s,%s);"
+        self.database_manager.update(query=query,args=(player_id,session_code,message,))
 
     def printStuff(self):
         print("printing from")

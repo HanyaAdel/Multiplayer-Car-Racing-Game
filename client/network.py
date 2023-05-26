@@ -72,9 +72,10 @@ class GameNetwork:
         self.client.connect(addr)
         
     def getInitialGameData(self):
-        reply = self.client.recv(5)
+        reply = self.client.recv(7)
+        print("message received: ", reply)
         d = reply.decode().split(":")
-        return int(d[0]), int(d[1])
+        return int(d[0]), int(d[1]), int(d[2])
     
     def send_game(self, data, pick=False):
         """
@@ -96,7 +97,7 @@ class GameNetwork:
             pass
 
     def receive_game(self):
-        reply = self.client.recv(19)
+        reply = self.client.recv(21)
         # print("reply", reply)
         reply = reply.decode()
         return reply

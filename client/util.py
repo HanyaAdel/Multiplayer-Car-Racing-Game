@@ -9,7 +9,7 @@ def fill_data(data):
 def parse_location(data):
         try:
             d = data.split(":")
-            return int(d[1]), int(d[2]), int(d[3])
+            return int(d[1]), int(d[2]), int(d[3]), int(d[4])
         except:
             pass
 def parse_leaving_player(data):
@@ -18,6 +18,13 @@ def parse_leaving_player(data):
         return int(d[1])
     except:
         pass    
+
+def parse_obstacle_location(data):
+    try:
+        d = data.split(":")
+        return int(d[1])
+    except:
+        pass        
 
 def getHeader(data):
         try:
