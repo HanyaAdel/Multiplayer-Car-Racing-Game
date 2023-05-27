@@ -416,7 +416,11 @@ def receiver_thread():
 
                 if header == "END":
                     print("received end of session message")
-                    game_running = False
+                    #TODO
+
+                if header == "START":
+                     print("received start of session message")
+                     #TODO
                     
                 # add message for game start (HEADER = GAME_STARTED)
                     # set game_running to True
