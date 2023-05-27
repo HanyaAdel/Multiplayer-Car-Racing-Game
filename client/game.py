@@ -386,6 +386,10 @@ def receiver_thread():
                     enemy_car_startx = util.parse_obstacle_location(reply)
                     enemy_car_starty = 0
                     print("obstacle: ",enemy_car_startx)
+
+                if header == "END":
+                    print("received end of session message")
+                    #TODO
                     
                 # add message for game start (HEADER = GAME_STARTED)
                     # set game_running to True

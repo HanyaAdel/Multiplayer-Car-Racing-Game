@@ -46,6 +46,8 @@ class Network:
         util.send_data(new_session, self.client)
 
         if new_session == 'yes':
+            num_players = input("Enter number of players (max 3)")
+            util.send_data(num_players,self.client)
             session_code = util.receive_data(self.client)
             print (session_code)
         

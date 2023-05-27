@@ -39,8 +39,15 @@ class GameServer:
             if counter == 350:
                 counter = 0
                 reply = f"OBSTACLE: {random.randrange(80,240)}"
-               
                 util.broadcast(message= reply, clients=self.session.game_clients)
+            
+            if self.session.started and time.time() - self.session.start_time >= 10:
+                print("session time expired")
+                message = "END:"
+                util.broadcast(message, self.session.game_clients)
+                self.session.started = False
+
+               
             for idx , client in enumerate(self.session.game_clients):
                 # print("in for loop kbera, ", idx)
                 try:
