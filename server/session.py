@@ -2,6 +2,7 @@ from chat_server import ChatServer
 from game_server import GameServer
 import time
 import threading
+import util
 
 class Session:
     def __init__(self, model, expected):
@@ -39,6 +40,7 @@ class Session:
             self.started = True
             self.start_time = time.time()
             print("started timer")
+            util.broadcast("START:", self.game_clients)
     
     def get_lane(self):
         self.available_lanes.sort()
