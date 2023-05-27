@@ -36,7 +36,7 @@ class GameServer:
         counter = 0
         while True:
             counter += 1
-            if counter == 180:
+            if counter == 500:
                 counter = 0
                 reply = f"OBSTACLE: {random.randrange(80,240)}"
                

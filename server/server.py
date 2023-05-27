@@ -6,9 +6,9 @@ from model import Model
 import util
 
 # Connection Data
-host = ''
+host = 'localhost'
 
-port = 55555
+port = 5555
 
 # Starting Server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

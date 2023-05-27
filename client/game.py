@@ -18,6 +18,7 @@ BALL_RADIUS = 5
 BUFFER_SIZE = 1024
 W, H = 1300, 600
 display_width, display_height = 1500, 600
+chat_width, chat_height = 200, 100
 
 lane_width = W/3
 lane_margin = 80
@@ -34,8 +35,6 @@ render_bg = False
 #clock 
 clock = pygame.time.Clock()
 
-
-
 NAME_FONT = pygame.font.SysFont("comicsans", 20)
 TIME_FONT = pygame.font.SysFont("comicsans", 30)
 SCORE_FONT = pygame.font.SysFont("comicsans", 26)
@@ -50,6 +49,8 @@ game_conn = None
 chat_conn = None
 players = []
 messages = []
+message = ""
+message_ready = False
 
 car1Img = pygame.image.load('car1.png')
 car2Img = pygame.image.load('car2.png')
@@ -63,6 +64,7 @@ enemy_car_starty = 0
 enemy_car_speed = 5
 enemy_car_width = 49
 enemy_car_height = 100
+
 
 
 # FUNCTIONS
@@ -142,7 +144,7 @@ def redraw_window(players, score):
     #update enemy car y location
     enemy_car_starty+= enemy_car_speed
     if enemy_car_starty >= H:
-        enemy_car_starty = -enemy_car_height
+        enemy_car_starty = H + 100
 
         
         # render and draw name for each player
@@ -200,7 +202,7 @@ def main(game_conn, chat_conn):
 
     while num_players<len(players):
         continue
-    # setup the clock, limit to 30fps
+    # # setup the clock, limit to 30fps
     clock = pygame.time.Clock()
 
     run = True
@@ -266,7 +268,9 @@ def main(game_conn, chat_conn):
                 # if user hits a escape key close program
                 if event.key == pygame.K_ESCAPE:
                     run = False
-
+            if inputHasMouse() == True and event.type == pygame.KEYDOWN:
+                print("has mouse and key down!!")
+                read_chat_input(event)
 
         # redraw window then update the frame
         redraw_window(players, score)
@@ -288,12 +292,32 @@ def display_message(msg):
         # self.display_credit()
         pygame.display.update()
         # self.clock.tick(60)
-        sleep(1)
+        #sleep(1)
 
+def inputHasMouse():
+    (x,y) = pygame.mouse.get_pos()
+    return x > W and x < W + chat_width and y < H and y > H - chat_height
+    
+    
+def read_chat_input(event):
+
+    global message, message_ready
+     
+    if event.key == pygame.K_RETURN:
+            message_ready = True
+            print("message ready: " + message + "\n")
+    if event.key == pygame.K_BACKSPACE:
+            message = message[:-1]
+    else:
+        if str(pygame.key.name(event.key)).isalnum() and len(str(pygame.key.name(event.key))) == 1:
+            message += pygame.key.name(event.key)
+    
+     
 def display_chat():
         x, y = 1300, 0
-        pygame.draw.rect(WIN, (255, 247, 174), (W, 0, 200, 600))
-
+        pygame.draw.rect(WIN, (255, 247, 174), (W - 10, 0, 210, 500))
+        pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+        
         msg = "Group Chat"
         font = pygame.font.SysFont("comicsansms", 20, True)
         text = font.render(msg, True, (0, 0, 0))
@@ -331,7 +355,7 @@ def sender_thread():
             break
 
 def receiver_thread():
-    global current_id, game_conn, enemy_car_startx
+    global current_id, game_conn, enemy_car_startx, enemy_car_starty
     # clock = pygame.time.Clock()
     while True:
         try:
@@ -370,6 +394,7 @@ def receiver_thread():
                             pass
                 if header == "OBSTACLE":
                     enemy_car_startx = util.parse_obstacle_location(reply)
+                    enemy_car_starty = 0
                     print("obstacle: ",enemy_car_startx)
 
         except:
@@ -412,10 +437,14 @@ def receive_chat_messages():
 
 # Sending Messages To Server
 def write_chat_messages():
-    global chat_conn
+    global chat_conn, message, message_ready
     while True:
-        message = input('')
-        util.send_data(message, chat_conn.client)
+        #send message from gui not terminal
+        #message = input('')
+        if(message_ready):
+            util.send_data(message, chat_conn.client)
+            message_ready = False
+            message = ""
 
 
 # get users name
