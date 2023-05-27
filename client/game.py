@@ -252,9 +252,9 @@ def main(game_conn, chat_conn):
 
         score += 1
         if (score % 100 == 0):
-            if enemy_car_speed < 50:
+            if enemy_car_speed < 30:
                 enemy_car_speed += 1
-            if bg_speed < 50:
+            if bg_speed < 30:
                 bg_speed += 1
 
         for event in pygame.event.get():
@@ -284,7 +284,7 @@ def main(game_conn, chat_conn):
 def display_message(msg):
         font = pygame.font.SysFont("comicsansms", 72, True)
         text = font.render(msg, True, (255, 255, 255))
-        WIN.blit(text, (400 - text.get_width() // 2, 240 - text.get_height() // 2))
+        WIN.blit(text, (700 - text.get_width() // 2, 240 - text.get_height() // 2))
         # self.display_credit()
         pygame.display.update()
         # self.clock.tick(60)
