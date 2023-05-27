@@ -9,6 +9,8 @@ import random
 import threading
 import os
 import util
+import operator
+
 pygame.font.init()
 
 # Constants
@@ -66,6 +68,8 @@ enemy_car_speed = 5
 enemy_car_width = 49
 enemy_car_height = 100
 
+game_running = False
+
 
 
 # FUNCTIONS
@@ -91,7 +95,7 @@ def convert_time(t):
 
         return minutes + ":" + seconds
 
-def redraw_window(players, score):
+def redraw_window(players):
     """
     draws each frame
     :return: None
@@ -110,12 +114,6 @@ def redraw_window(players, score):
     if bg_y2 >= H:
            bg_y2 = -600
 
-
-        # draw all the orbs/balls
-    # for ball in balls:
-    #     pygame.draw.circle(WIN, ball[2], (ball[0], ball[1]), BALL_RADIUS)
-
-
     # draw each player in the list
     for player in players:
         #pygame.draw.circle(WIN, (255, 0, 0), (player["x"], player["y"]), PLAYER_RADIUS )
@@ -130,21 +128,22 @@ def redraw_window(players, score):
             WIN.blit(car3Img, (player["x"], player["y"]))
             
         font = pygame.font.SysFont("arial", 20)
-        #text = font.render("Score : " + str(player["score"]), True, white)
-        text = font.render("Score : " + str(score), True, white)
+        text = font.render("Score : " + str(player["score"]), True, white)
+        # text = font.render("Score : " + str(score), True, white)
         WIN.blit(text, ((lane_number - 1) * lane_width, 0))
-            
-       
-        #pygame.draw.circle(WIN, (0, 255, 0), (enemy_car_startx, enemy_car_starty), PLAYER_RADIUS )
         
         #render enemy car
-        if enemy_car_startx != 0 :
+        if enemy_car_startx != 0 and enemy_car_starty != None:
             WIN.blit(enemy_car, (enemy_car_startx + (lane_number - 1) * lane_width , enemy_car_starty))
     
+    
+    display_ranks(players)
+    
     #update enemy car y location
-    enemy_car_starty+= enemy_car_speed
-    if enemy_car_starty >= H:
-        enemy_car_starty = -100
+    if(enemy_car_starty != None):
+        enemy_car_starty+= enemy_car_speed
+        if enemy_car_starty >= H:
+            enemy_car_starty = None
 
         
         # render and draw name for each player
@@ -179,10 +178,9 @@ def main(game_conn, chat_conn):
     :param players: a list of dicts represting a player
     :return: None
     """
-    global players, current_id, server, score, enemy_car_speed, bg_speed
+    global players, current_id, server, enemy_car_speed, bg_speed
     
     #private score for each player to be sent to the server
-    score = 0
     current_id, num_players,lane, score= game_conn.getInitialGameData()
     lane_number = lane
     print("lane no: ",lane_number)
@@ -201,12 +199,17 @@ def main(game_conn, chat_conn):
 
     while num_players<len(players):
         continue
+    
+    # wait until server starts the game timer
+    # while game_running == False:
+    #     continue
     # # setup the clock, limit to 30fps
     clock = pygame.time.Clock()
 
     run = True
     WIN.fill((192, 192, 192)) # fill screen white, to clear old frames
 
+    #modify to while game_running
     while run:
         clock.tick(60) # 30 fps max
         player_idx = util.get_player_idx_by_id(id=current_id, players=players)
@@ -223,37 +226,30 @@ def main(game_conn, chat_conn):
 
         data = ""
         # movement based on key presses
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if not inputHasMouse() and (keys[pygame.K_LEFT] or keys[pygame.K_a]):
             if player["x"] - vel - PLAYER_RADIUS >= 0:
                 player["x"] = player["x"] - vel
-
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                
+        if not inputHasMouse() and (keys[pygame.K_RIGHT] or keys[pygame.K_d]):
             if player["x"] + vel + PLAYER_RADIUS  <= W:
                 player["x"] = player["x"] + vel
 
-        # if keys[pygame.K_UP] or keys[pygame.K_w]:
-        #     if player["y"] - vel - PLAYER_RADIUS  >= 0:
-        #         player["y"] = player["y"] - vel
-
-        # if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-        #     if player["y"] + vel + PLAYER_RADIUS <= H:
-        #         player["y"] = player["y"] + vel
-
         if player["x"] < 80+(lane_number-1)*lane_width or player["x"] > 360+(lane_number-1)*lane_width:
             #if user hits the boundaries
-            score -= 100
+            player["score"] -= 10
             display_message("Boundary hit !! score down!")
             
+            
         enemy_car_shifted_startx = enemy_car_startx + (lane_number-1)*lane_width  
-        if player["y"] < enemy_car_starty + enemy_car_height:
+        if enemy_car_starty != None and player["y"] < enemy_car_starty + enemy_car_height:
             if player["x"] > enemy_car_shifted_startx and player["x"] < enemy_car_shifted_startx + enemy_car_width or player["x"] + car_width > enemy_car_shifted_startx and player["x"] + car_width < enemy_car_shifted_startx + enemy_car_width:
                     #run = False
                     # display_message("Game Over !!!")
-                    score -= 100
+                    player["score"] -= 10
                     display_message("Collision !! score down!")
 
-        score += 1
-        if (score % 100 == 0):
+        player["score"] += 1
+        if (player["score"] % 100 == 0):
             if enemy_car_speed < 30:
                 enemy_car_speed += 1
             if bg_speed < 30:
@@ -272,27 +268,44 @@ def main(game_conn, chat_conn):
                 print("has mouse and key down!!")
                 read_chat_input(event)
 
+        #if timer elapsed from the server, show ranking and exit the run
+        # if keys[pygame.K_0] == True:
+        #         display_ranks(players)
+        #         run = False
+
         # redraw window then update the frame
-        redraw_window(players, score)
+        redraw_window(players)
         display_chat()
         pygame.display.update()
         clock.tick(60)
-
+        
+    print("exited the run")
     server.disconnect()
     game_conn.disconnect()
     chat_conn.disconnect()
     pygame.quit()
     quit()
 
+
+def display_ranks(players):
+    #sort
+    sorted_players = sorted(players, key=operator.itemgetter('score'))
+    for i in range(0, len(sorted_players)):
+        player = sorted_players[i]
+        font = pygame.font.SysFont("arial", 20)
+        text = font.render("Rank: " + str(i + 1), True, white)
+        WIN.blit(text, (((player["lane"] - 1) * lane_width) + 250, 0))
         
+ 
+            
 def display_message(msg):
         font = pygame.font.SysFont("comicsansms", 72, True)
         text = font.render(msg, True, (255, 255, 255))
         WIN.blit(text, (700 - text.get_width() // 2, 240 - text.get_height() // 2))
         # self.display_credit()
         pygame.display.update()
-        # self.clock.tick(60)
-        #sleep(1)
+        #self.clock.tick(60)
+        sleep(1)
 
 def inputHasMouse():
     (x,y) = pygame.mouse.get_pos()
@@ -310,7 +323,9 @@ def read_chat_input(event):
     if event.key == pygame.K_BACKSPACE:
             message = message[:-1]
             dispaly_input_message(message)
-
+    if event.key == pygame.K_SPACE:
+            message += ' '
+            dispaly_input_message(message)
     else:
         if str(pygame.key.name(event.key)).isalnum() and len(str(pygame.key.name(event.key))) == 1:
             message += pygame.key.name(event.key)
@@ -360,14 +375,14 @@ def display_chat():
         # sleep(1)
 
 def sender_thread():
-    global current_id, game_conn, score
+    global current_id, game_conn
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
         try:
             player_idx = util.get_player_idx_by_id(id=current_id, players=players)
             player = players[player_idx]
-            reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}:{score}"
+            reply = f"LOCATION: {player['id']}:{player['x']}:{player['y']}:{player['score']}"
             game_conn.send_game(reply)
         except:
             print("error")
@@ -415,6 +430,12 @@ def receiver_thread():
                     enemy_car_startx = util.parse_obstacle_location(reply)
                     enemy_car_starty = 0
                     print("obstacle: ",enemy_car_startx)
+                    
+                # add message for game start (HEADER = GAME_STARTED)
+                    # set game_running to True
+                    
+                # add message for game end (HEADER = GAME_ENDED)
+                    # set game_running to False
 
         except:
             break
