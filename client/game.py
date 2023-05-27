@@ -192,9 +192,6 @@ def main(game_conn, chat_conn):
             if lane_number == 4:            
                 pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
 
-
-
-        
         #detect collision with enemy car
         enemy_car_shifted_startx = enemy_car_startx + (lane_number-1)*lane_width  
         if enemy_car_starty != None and player["y"] < enemy_car_starty + enemy_car_height:
@@ -228,9 +225,9 @@ def main(game_conn, chat_conn):
                 read_chat_input(event)
 
         #if timer elapsed from the server, show ranking and exit the run
-        # if keys[pygame.K_0] == True:
-        #         display_ranks(players)
-        #         run = False
+        if keys[pygame.K_0] == True:
+               display_final_ranks(players)
+               
 
         # redraw window then update the frame
         redraw_window(players)
@@ -249,13 +246,31 @@ def main(game_conn, chat_conn):
 def display_ranks(players):
     #sort players list according to their scores then render the rankings
     sorted_players = sorted(players, key=operator.itemgetter('score'))
-    for i in range(0, len(sorted_players)):
+    for i in range(len(sorted_players) - 1, -1, -1):
         player = sorted_players[i]
         font = pygame.font.SysFont("arial", 20)
         text = font.render("Rank: " + str(i + 1), True, white)
         WIN.blit(text, (((player["lane"] - 1) * lane_width)+5, 20))
         
- 
+def display_final_ranks(players):
+    #sort players list according to their scores then render the rankings
+    while True:
+        sorted_players = sorted(players, key=operator.itemgetter('score'))
+        for i in range(len(sorted_players) - 1, -1, -1):
+            player = sorted_players[i]
+            font = pygame.font.SysFont("comicsansms", 40)
+            if player["lane"] == 1:
+                text = font.render("Rank: " + str(i + 1), True, (255, 0, 0))
+            elif player["lane"] == 2:
+                text = font.render("Rank: " + str(i + 1), True, (255, 247, 174))
+            elif player["lane"] == 3:
+                text = font.render("Rank: " + str(i + 1), True, (255, 255, 255))
+            else:
+                text = font.render("Rank: " + str(i + 1), True, (148,0,211))
+            
+            WIN.blit(text, (((player["lane"] - 1) * lane_width)+ lane_width/2 - 50, display_height / 2))
+            pygame.display.update()
+            #sleep(5)
             
 def display_message(msg):
         font = pygame.font.SysFont("comicsansms", 72, True)

@@ -2,9 +2,9 @@ import socket
 import  pickle
 import util
 
-#HOST = 'localhost'
-HOST = '98.66.137.14'
-PORT = 55555
+HOST = 'localhost'
+#HOST = '98.66.137.14'
+PORT = 5555
 
 class Network:
     """
