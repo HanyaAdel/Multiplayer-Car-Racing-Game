@@ -71,7 +71,7 @@ enemy_car_speed = 5
 enemy_car_width = 49
 enemy_car_height = 100
 
-game_running = False
+game_running = True
 
 
 def redraw_window(players):
@@ -225,7 +225,7 @@ def main(game_conn, chat_conn):
                 read_chat_input(event)
 
         #if timer elapsed from the server, show ranking and exit the run
-        if keys[pygame.K_0] == True:
+        if game_running == False:
                display_final_ranks(players)
                
 
@@ -245,8 +245,9 @@ def main(game_conn, chat_conn):
 
 def display_ranks(players):
     #sort players list according to their scores then render the rankings
-    sorted_players = sorted(players, key=operator.itemgetter('score'))
-    for i in range(len(sorted_players) - 1, -1, -1):
+    sorted_players_asc = sorted(players, key=operator.itemgetter('score'))
+    sorted_players = sorted_players_asc[::-1]  
+    for i in range(0, len(sorted_players)):
         player = sorted_players[i]
         font = pygame.font.SysFont("arial", 20)
         text = font.render("Rank: " + str(i + 1), True, white)
@@ -255,8 +256,9 @@ def display_ranks(players):
 def display_final_ranks(players):
     #sort players list according to their scores then render the rankings
     while True:
-        sorted_players = sorted(players, key=operator.itemgetter('score'))
-        for i in range(len(sorted_players) - 1, -1, -1):
+        sorted_players_asc = sorted(players, key=operator.itemgetter('score'))
+        sorted_players = sorted_players_asc[::-1]  
+        for i in range(0, len(sorted_players)):
             player = sorted_players[i]
             font = pygame.font.SysFont("comicsansms", 40)
             if player["lane"] == 1:
@@ -370,7 +372,7 @@ def sender_thread():
             break
 
 def receiver_thread():
-    global current_id, game_conn, enemy_car_startx, enemy_car_starty
+    global current_id, game_conn, enemy_car_startx, enemy_car_starty, game_running
     # clock = pygame.time.Clock()
     while True:
         try:
@@ -414,7 +416,7 @@ def receiver_thread():
 
                 if header == "END":
                     print("received end of session message")
-                    #TODO
+                    game_running = False
                     
                 # add message for game start (HEADER = GAME_STARTED)
                     # set game_running to True
