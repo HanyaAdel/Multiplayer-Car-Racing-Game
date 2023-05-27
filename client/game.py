@@ -33,7 +33,7 @@ bg_x1 = 0
 bg_x2 = 0
 bg_y1 = 0
 bg_y2 = -600
-bg_speed = 3
+bg_speed = 10
 render_bg = False
 
 
@@ -67,7 +67,7 @@ car_height = 100
 enemy_car = pygame.image.load('enemy_car.png')
 enemy_car_startx = 0
 enemy_car_starty = 0
-enemy_car_speed = 5
+enemy_car_speed = 15
 enemy_car_width = 49
 enemy_car_height = 100
 
@@ -208,11 +208,11 @@ def main(game_conn, chat_conn):
         #adjust player score, bg speed, and enemy car speed
         if timer_started: 
             player["score"] += 1
-            if (player["score"] % 100 == 0):
-                if enemy_car_speed < 30:
-                    enemy_car_speed += 1
-                if bg_speed < 30:
-                    bg_speed += 1
+            # if (player["score"] % 100 == 0):
+            #     if enemy_car_speed < 30:
+            #         enemy_car_speed += 1
+            #     if bg_speed < 30:
+            #         bg_speed += 1
 
         for event in pygame.event.get():
             # if user hits red x button close window
