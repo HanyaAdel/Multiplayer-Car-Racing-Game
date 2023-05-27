@@ -11,7 +11,7 @@ class Session:
         self.game_clients = []
         self.chat_clients = []
         self.exist = True
-        self.available_lanes = [1,2, 3]
+        self.available_lanes = [1,2, 3, 4]
         self.expected = expected
         self.started = False
         self.start_time = None

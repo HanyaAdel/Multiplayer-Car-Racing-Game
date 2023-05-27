@@ -81,10 +81,10 @@ def handle_incoming_connection(client, address):
                 util.send_data("FAIL", client)
                 #client.send("FAIL".encode('ascii'))
                 pass
-            elif len(session.players) == 3:
+            elif len(session.players) == 4:
                 util.send_data("FULL", client)
             
-            elif session and len(session.players) < 3:
+            elif session and len(session.players) < 4:
                 valid_session = True
         session.add_client(game_client, chat_client, username = username, client_id=client_id)
     

@@ -71,7 +71,8 @@ enemy_car_speed = 5
 enemy_car_width = 49
 enemy_car_height = 100
 
-game_running = True
+timer_ended = False
+timer_started = False
 
 
 def redraw_window(players):
@@ -156,6 +157,7 @@ def main(game_conn, chat_conn):
     # # setup the clock, limit to 30fps
     clock = pygame.time.Clock()
 
+    
     run = True
     
     # fill screen white, to clear old frames
@@ -187,7 +189,8 @@ def main(game_conn, chat_conn):
 
         if player["x"] < (lane_number-1)*lane_width or player["x"] > 224+(lane_number-1)*lane_width:
             #if user hits the boundaries
-            player["score"] -= 10
+            if timer_started:
+                player["score"] -= 10
             display_message("Boundary hit !! score down!")
             if lane_number == 4:            
                 pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
@@ -198,16 +201,18 @@ def main(game_conn, chat_conn):
             if player["x"] > enemy_car_shifted_startx and player["x"] < enemy_car_shifted_startx + enemy_car_width or player["x"] + car_width > enemy_car_shifted_startx and player["x"] + car_width < enemy_car_shifted_startx + enemy_car_width:
                     #run = False
                     # display_message("Game Over !!!")
-                    player["score"] -= 10
+                    if timer_started:
+                        player["score"] -= 10
                     display_message("Collision !! score down!")
 
         #adjust player score, bg speed, and enemy car speed
-        player["score"] += 1
-        if (player["score"] % 100 == 0):
-            if enemy_car_speed < 30:
-                enemy_car_speed += 1
-            if bg_speed < 30:
-                bg_speed += 1
+        if timer_started: 
+            player["score"] += 1
+            if (player["score"] % 100 == 0):
+                if enemy_car_speed < 30:
+                    enemy_car_speed += 1
+                if bg_speed < 30:
+                    bg_speed += 1
 
         for event in pygame.event.get():
             # if user hits red x button close window
@@ -225,10 +230,9 @@ def main(game_conn, chat_conn):
                 read_chat_input(event)
 
         #if timer elapsed from the server, show ranking and exit the run
-        if game_running == False:
+        if timer_ended == True:
                display_final_ranks(players)
                
-
         # redraw window then update the frame
         redraw_window(players)
         display_chat()
@@ -372,7 +376,7 @@ def sender_thread():
             break
 
 def receiver_thread():
-    global current_id, game_conn, enemy_car_startx, enemy_car_starty, game_running
+    global current_id, game_conn, enemy_car_startx, enemy_car_starty, timer_started, timer_ended
     # clock = pygame.time.Clock()
     while True:
         try:
@@ -416,11 +420,11 @@ def receiver_thread():
 
                 if header == "END":
                     print("received end of session message")
-                    #TODO
+                    timer_ended = True
 
                 if header == "START":
                      print("received start of session message")
-                     #TODO
+                     timer_started = True
                     
                 # add message for game start (HEADER = GAME_STARTED)
                     # set game_running to True
