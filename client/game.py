@@ -23,7 +23,7 @@ display_width, display_height = 1350, 600
 input_width, input_height = 250, 100
 chat_height = 500
 max_chat_length = 18
-chat_padding = 5
+chat_padding = 9
 
 lane_width = W/4
 lane_margin = 80
@@ -190,7 +190,7 @@ def main(game_conn, chat_conn):
             player["score"] -= 10
             display_message("Boundary hit !! score down!")
             if lane_number == 4:            
-                pygame.draw.rect(WIN, (192, 192, 192), (W+chat_padding, chat_height, input_width, input_height))
+                pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
 
 
 
@@ -253,7 +253,7 @@ def display_ranks(players):
         player = sorted_players[i]
         font = pygame.font.SysFont("arial", 20)
         text = font.render("Rank: " + str(i + 1), True, white)
-        WIN.blit(text, (((player["lane"] - 1) * lane_width) + 250, 0))
+        WIN.blit(text, (((player["lane"] - 1) * lane_width)+5, 20))
         
  
             
@@ -279,7 +279,7 @@ def read_chat_input(event):
     #if user press enter, set message as ready to be sent to the server
     if event.key == pygame.K_RETURN:
             message_ready = True
-            pygame.draw.rect(WIN, (192, 192, 192), (W+chat_padding, chat_height, input_width, input_height))
+            pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
             print("message ready: " + message + "\n")
             
     #if user press backspace, delete the last character and update the displayed input
@@ -301,7 +301,7 @@ def read_chat_input(event):
 
 def dispaly_input_message(message):
         x, y = W+chat_padding, H-input_height+10
-        pygame.draw.rect(WIN, (192, 192, 192), (W+chat_padding, chat_height, input_width, input_height))
+        pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
         
         #divide the input message into submessages to be displayed in new lines in the 
         #input area if width limit reached
@@ -312,13 +312,13 @@ def dispaly_input_message(message):
                 WIN.blit(text, (x, y))
                 y+=25   
                 if y > H:
-                    pygame.draw.rect(WIN, (192, 192, 192), (W+chat_padding, chat_height, input_width, input_height))
+                    pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
                     y = H-input_height+10
     
      
 def display_chat():
         x, y = W+chat_padding, 0
-        pygame.draw.rect(WIN, (255, 247, 174), (W+chat_padding, 0, input_width, chat_height))
+        pygame.draw.rect(WIN, (255, 247, 174), (W, 0, input_width, chat_height))
         # pygame.draw.rect(WIN, (192, 192, 192), (W, 500, 210, 100))
         
         msg = "Group Chat"
