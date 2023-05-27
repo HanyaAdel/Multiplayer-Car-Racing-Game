@@ -185,7 +185,7 @@ def main(game_conn, chat_conn):
             if player["x"] + vel + PLAYER_RADIUS  <= W:
                 player["x"] = player["x"] + vel
 
-        if player["x"] < 80+(lane_number-1)*lane_width or player["x"] > 360+(lane_number-1)*lane_width:
+        if player["x"] < (lane_number-1)*lane_width or player["x"] > 224+(lane_number-1)*lane_width:
             #if user hits the boundaries
             player["score"] -= 10
             display_message("Boundary hit !! score down!")
