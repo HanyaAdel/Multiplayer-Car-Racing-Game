@@ -61,7 +61,8 @@ def handle_incoming_connection(client, address):
 
     if newSession == 'yes':
         # start new session
-        newSession = Session(model=model)
+        expected_num_players = int(util.receive_data(client))
+        newSession = Session(model=model, expected=expected_num_players)
         code = newSession.session_code
         util.send_data(f"CODE: {code}", client)
         sessions.append(newSession)

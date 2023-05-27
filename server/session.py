@@ -4,13 +4,16 @@ import time
 import threading
 
 class Session:
-    def __init__(self, model):
+    def __init__(self, model, expected):
         self.model = model
         self.numPlayers = 0
         self.game_clients = []
         self.chat_clients = []
         self.exist = True
         self.available_lanes = [1,2, 3]
+        self.expected = expected
+        self.started = False
+        self.start_time = None
 
         self.players = []
         self.session_code = model.addSession()
@@ -27,6 +30,15 @@ class Session:
         self.game_server.add_client(id=client_id,game_client=game_client)
         self.chat_server.add_client(id=client_id, chat_client=chat_client, messages=messages)
         self.numPlayers += 1
+        print(f"number of players:{self.numPlayers}, expected:{self.expected}")
+        if(self.numPlayers==self.expected):
+            self.start_timer()
+    
+    def start_timer(self):
+        if not self.started:
+            self.started = True
+            self.start_time = time.time()
+            print("started timer")
     
     def get_lane(self):
         self.available_lanes.sort()
@@ -51,5 +63,6 @@ class Session:
             # for player in self.players:
             #     player['score']+=1
             self.model.updateRecords([tuple([d['score'],d['id'],self.session_code]) for d in self.players])
+
             time.sleep(1) #update records once every second
             
