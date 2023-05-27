@@ -18,15 +18,17 @@ PLAYER_RADIUS = 10
 START_VEL = 9
 BALL_RADIUS = 5
 BUFFER_SIZE = 1024
-W, H = 1300, 600
-display_width, display_height = 1500, 600
-chat_width, chat_height = 200, 100
+W, H = 1100, 600
+display_width, display_height = 1350, 600
+input_width, input_height = 250, 100
+chat_height = 500
 max_chat_length = 18
+chat_padding = 9
 
-lane_width = W/3
+lane_width = W/4
 lane_margin = 80
 #Background
-bgImg = pygame.image.load("background.jpg")
+bgImg = pygame.image.load("new_background.jpeg")
 bg_x1 = 0
 bg_x2 = 0
 bg_y1 = 0
@@ -58,6 +60,7 @@ message_ready = False
 car1Img = pygame.image.load('car1.png')
 car2Img = pygame.image.load('car2.png')
 car3Img = pygame.image.load('car3.png')
+car4Img = pygame.image.load('car4.png')
 car_width = 49
 car_height = 100
 
@@ -94,8 +97,11 @@ def redraw_window(players):
             WIN.blit(car1Img, (player["x"], player["y"]))
         elif lane_number == 2: 
             WIN.blit(car2Img, (player["x"], player["y"]))
-        else:
+        elif lane_number == 3:
             WIN.blit(car3Img, (player["x"], player["y"]))
+        else:
+            WIN.blit(car4Img, (player["x"], player["y"]))
+
             
         #render the player score
         font = pygame.font.SysFont("arial", 20)
@@ -179,11 +185,15 @@ def main(game_conn, chat_conn):
             if player["x"] + vel + PLAYER_RADIUS  <= W:
                 player["x"] = player["x"] + vel
 
-        if player["x"] < 80+(lane_number-1)*lane_width or player["x"] > 360+(lane_number-1)*lane_width:
+        if player["x"] < (lane_number-1)*lane_width or player["x"] > 224+(lane_number-1)*lane_width:
             #if user hits the boundaries
             player["score"] -= 10
             display_message("Boundary hit !! score down!")
-            
+            if lane_number == 4:            
+                pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
+
+
+
         
         #detect collision with enemy car
         enemy_car_shifted_startx = enemy_car_startx + (lane_number-1)*lane_width  
@@ -243,7 +253,7 @@ def display_ranks(players):
         player = sorted_players[i]
         font = pygame.font.SysFont("arial", 20)
         text = font.render("Rank: " + str(i + 1), True, white)
-        WIN.blit(text, (((player["lane"] - 1) * lane_width) + 250, 0))
+        WIN.blit(text, (((player["lane"] - 1) * lane_width)+5, 20))
         
  
             
@@ -259,7 +269,7 @@ def display_message(msg):
 def inputHasMouse():
     #check if the mouse is hovering over the chat input area
     (x,y) = pygame.mouse.get_pos()
-    return x > W and x < W + chat_width and y < H and y > H - chat_height
+    return x > W and x < W + input_width and y < H and y > H - input_height
     
     
 def read_chat_input(event):
@@ -269,7 +279,7 @@ def read_chat_input(event):
     #if user press enter, set message as ready to be sent to the server
     if event.key == pygame.K_RETURN:
             message_ready = True
-            pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+            pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
             print("message ready: " + message + "\n")
             
     #if user press backspace, delete the last character and update the displayed input
@@ -290,8 +300,8 @@ def read_chat_input(event):
 
 
 def dispaly_input_message(message):
-        x, y = W, H-chat_height+10
-        pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+        x, y = W+chat_padding, H-input_height+10
+        pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
         
         #divide the input message into submessages to be displayed in new lines in the 
         #input area if width limit reached
@@ -302,14 +312,14 @@ def dispaly_input_message(message):
                 WIN.blit(text, (x, y))
                 y+=25   
                 if y > H:
-                    pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
-                    y = H-chat_height+10
+                    pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
+                    y = H-input_height+10
     
      
 def display_chat():
-        x, y = 1300, 0
-        pygame.draw.rect(WIN, (255, 247, 174), (W - 10, 0, 210, 500))
-        # pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+        x, y = W+chat_padding, 0
+        pygame.draw.rect(WIN, (255, 247, 174), (W, 0, input_width, chat_height))
+        # pygame.draw.rect(WIN, (192, 192, 192), (W, 500, 210, 100))
         
         msg = "Group Chat"
         font = pygame.font.SysFont("comicsansms", 20, True)
@@ -326,8 +336,8 @@ def display_chat():
                 text = font.render(sub_msg, True, (0, 0, 0))
                 WIN.blit(text, (x, y))
                 y+=25   
-                if y > H -chat_height:
-                    pygame.draw.rect(WIN, (255, 247, 174), (W - 10, 0, 210, 500))
+                if y > H -input_height:
+                    pygame.draw.rect(WIN, (255, 247, 174), (W, 0, input_width, chat_height))
                     y = 30
 
 def sender_thread():
