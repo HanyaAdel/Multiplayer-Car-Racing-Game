@@ -19,6 +19,7 @@ BUFFER_SIZE = 1024
 W, H = 1300, 600
 display_width, display_height = 1500, 600
 chat_width, chat_height = 200, 100
+max_chat_length = 18
 
 lane_width = W/3
 lane_margin = 80
@@ -97,7 +98,6 @@ def redraw_window(players, score):
     """
     global bg_y1, bg_y2, bg_speed, bgImg, enemy_car_starty
     
-    WIN.fill((255,255,255)) # fill screen white, to clear old frames
     WIN.blit(bgImg, (bg_x1, bg_y1))
     WIN.blit(bgImg, (bg_x2, bg_y2))
 
@@ -144,7 +144,7 @@ def redraw_window(players, score):
     #update enemy car y location
     enemy_car_starty+= enemy_car_speed
     if enemy_car_starty >= H:
-        enemy_car_starty = H + 100
+        enemy_car_starty = -100
 
         
         # render and draw name for each player
@@ -190,7 +190,6 @@ def main(game_conn, chat_conn):
     # need to add 'score' and 'name' keys 
     players.append({'id':current_id, 'x':x, 'y':H - car_height, 'lane':lane_number, 'score': score})
 
-
     sendThread = threading.Thread(target=sender_thread)
     receiveThread = threading.Thread(target=receiver_thread)
     chatSendThread = threading.Thread(target=write_chat_messages)
@@ -206,6 +205,7 @@ def main(game_conn, chat_conn):
     clock = pygame.time.Clock()
 
     run = True
+    WIN.fill((192, 192, 192)) # fill screen white, to clear old frames
 
     while run:
         clock.tick(60) # 30 fps max
@@ -305,18 +305,37 @@ def read_chat_input(event):
      
     if event.key == pygame.K_RETURN:
             message_ready = True
+            pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
             print("message ready: " + message + "\n")
     if event.key == pygame.K_BACKSPACE:
             message = message[:-1]
+            dispaly_input_message(message)
+
     else:
         if str(pygame.key.name(event.key)).isalnum() and len(str(pygame.key.name(event.key))) == 1:
             message += pygame.key.name(event.key)
+            dispaly_input_message(message)
+
+
+def dispaly_input_message(message):
+        x, y = W, H-chat_height+10
+        pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+        
+        for i in range(0, len(message), max_chat_length): 
+                sub_msg = message[i:i+max_chat_length]
+                font = pygame.font.SysFont("arial", 15, True)
+                text = font.render(sub_msg, True, (0, 0, 0))
+                WIN.blit(text, (x, y))
+                y+=25   
+                if y > H:
+                    pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+                    y = H-chat_height+10
     
      
 def display_chat():
         x, y = 1300, 0
         pygame.draw.rect(WIN, (255, 247, 174), (W - 10, 0, 210, 500))
-        pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
+        # pygame.draw.rect(WIN, (192, 192, 192), (W - 10, 500, 210, 100))
         
         msg = "Group Chat"
         font = pygame.font.SysFont("comicsansms", 20, True)
@@ -324,17 +343,17 @@ def display_chat():
         WIN.blit(text, (x, y))
         y+=30
 
-        max_len = 20 
         # msg[i:i+max_len] for i in range(0, len(msg), max_len)
         for msg in messages:
-            for i in range(0, len(msg), max_len): 
-                sub_msg = msg[i:i+max_len]
+            for i in range(0, len(msg), max_chat_length): 
+                sub_msg = msg[i:i+max_chat_length]
                 font = pygame.font.SysFont("arial", 15, True)
                 text = font.render(sub_msg, True, (0, 0, 0))
                 WIN.blit(text, (x, y))
                 y+=25   
-                if y > H:
-                    y-=25
+                if y > H -chat_height:
+                    pygame.draw.rect(WIN, (255, 247, 174), (W - 10, 0, 210, 500))
+                    y = 30
         # self.display_credit()
         # pygame.display.update()
         # # self.clock.tick(60)
