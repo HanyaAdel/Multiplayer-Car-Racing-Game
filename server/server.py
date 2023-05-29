@@ -6,9 +6,9 @@ from model import Model
 import util
 
 # Connection Data
-host = 'localhost'
+host = ''
 
-port = 5555
+port = 55555
 
 # Starting Server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -85,6 +85,7 @@ def handle_incoming_connection(client, address):
                 util.send_data("FULL", client)
             
             elif session and len(session.players) < 4:
+                util.send_data("SUCCESS", client)
                 valid_session = True
         session.add_client(game_client, chat_client, username = username, client_id=client_id)
     

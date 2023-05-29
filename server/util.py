@@ -30,6 +30,15 @@ def get_player_idx_by_id(id, players):
             return player_idx
     return -1
 
+def send_data(data, client):
+    
+    message_length = len(data.encode('utf-8'))
+
+    header = message_length.to_bytes(4, byteorder='big')
+    client.sendall(header + data.encode('utf-8'))
+
+
+
 def receive_data(client):
     header = client.recv(4)
     if not header:

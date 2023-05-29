@@ -55,7 +55,7 @@ class GameServer:
                         player_id = player['id']
                         reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}:{player['lane']}:{player['score']}"
 
-                        self.send_data(reply, client['client'])
+                        util.send_data(reply, client['client'])
                 except:
                     print("in exception")
                     self.remove_client(idx=idx)
@@ -72,14 +72,6 @@ class GameServer:
         except Exception as e:
             print("exception from parse data ", e)
             print(d)
-
-    
-    def send_data(self, data, client):
-        
-        message_length = len(data.encode('utf-8'))
-
-        header = message_length.to_bytes(4, byteorder='big')
-        client.sendall(header + data.encode('utf-8'))
 
 
 
@@ -115,7 +107,7 @@ class GameServer:
         index = util.get_player_idx_by_id(id, self.session.players)
         message = f"{id}:{len(self.session.players)}:{self.session.players[index]['lane']}:{self.session.players[index]['score']}"
 
-        self.send_data(message, game_client)
+        util.send_data(message, game_client)
 
         self.client_thread = threading.Thread(target=self.player_handle, args=(game_client,))
         self.client_thread.start()
