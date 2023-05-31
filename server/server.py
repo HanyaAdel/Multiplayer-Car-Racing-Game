@@ -4,11 +4,14 @@ from time import sleep
 from session import Session
 from model import Model
 import util
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Connection Data
 host = ''
 
-port = 55555
+port = int(os.getenv('PORT'))
 
 # Starting Server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
