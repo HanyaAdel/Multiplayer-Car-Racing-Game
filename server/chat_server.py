@@ -57,6 +57,9 @@ class ChatServer:
             chat_client.sendall(header + to_send.encode('utf-8'))
 
     def add_client(self, id, chat_client, messages):
+        index = util.get_client_idx_by_socket(chat_client, self.session.chat_clients)
+        name = self.session.players[index]['name']
+        self.broadcast_messages(f'{name} joined the session!')
         self.session.chat_clients.append({ 'id': id, 'client': chat_client })
         self.send_messages_history(chat_client, messages)
         self.client_thread = threading.Thread(target=self.handle_chat, args=(chat_client,))
