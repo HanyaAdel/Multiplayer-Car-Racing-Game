@@ -28,7 +28,7 @@ chat_padding = 9
 lane_width = W/4
 lane_margin = 80
 #Background
-bgImg = pygame.image.load("new_background.jpeg")
+bgImg = pygame.image.load("assets/new_background.jpeg")
 bg_x1 = 0
 bg_x2 = 0
 bg_y1 = 0
@@ -57,14 +57,14 @@ messages = []
 message = ""
 message_ready = False
 
-car1Img = pygame.image.load('car1.png')
-car2Img = pygame.image.load('car2.png')
-car3Img = pygame.image.load('car3.png')
-car4Img = pygame.image.load('car4.png')
+car1Img = pygame.image.load('assets/car1.png')
+car2Img = pygame.image.load('assets/car2.png')
+car3Img = pygame.image.load('assets/car3.png')
+car4Img = pygame.image.load('assets/car4.png')
 car_width = 49
 car_height = 100
 
-enemy_car = pygame.image.load('enemy_car.png')
+enemy_car = pygame.image.load('assets/enemy_car.png')
 enemy_car_startx = 0
 enemy_car_starty = 0
 enemy_car_speed = 15
@@ -485,8 +485,8 @@ def write_chat_messages():
 # get users name
 username, password = "", ""
 while True:
-    username = input ("Please enter your username")
-    password = input ("Please enter your password")
+    username = input ("Please enter your username: ")
+    password = input ("Please enter your password: ")
     if len(password) == 0 or len(username) == 0:
         print("Error, password cannot be empty")
     else: 
@@ -503,7 +503,7 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,30)
 
 # setup pygame window
 WIN = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption("Blobs")
+pygame.display.set_caption("Multiplayer car racing game")
 
 # start game
 main(game_conn, chat_conn)
