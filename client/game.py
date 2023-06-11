@@ -180,20 +180,20 @@ def main(game_conn, chat_conn):
 
         # movement based on key presses
         if not inputHasMouse() and (keys[pygame.K_LEFT] or keys[pygame.K_a]):
-            if player["x"] - vel - PLAYER_RADIUS >= 0:
+            if player["x"] - vel - PLAYER_RADIUS >= (lane_number-1)*lane_width:
                 player["x"] = player["x"] - vel
                 
         if not inputHasMouse() and (keys[pygame.K_RIGHT] or keys[pygame.K_d]):
-            if player["x"] + vel + PLAYER_RADIUS  <= W:
+            if player["x"] + vel + PLAYER_RADIUS  <= 235+(lane_number-1)*lane_width:
                 player["x"] = player["x"] + vel
 
-        if player["x"] < (lane_number-1)*lane_width or player["x"] > 224+(lane_number-1)*lane_width:
-            #if user hits the boundaries
-            if timer_started:
-                player["score"] -= 10
-            display_message("Boundary hit !! score down!")
-            if lane_number == 4:            
-                pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
+        # if player["x"] < (lane_number-1)*lane_width or player["x"] > 224+(lane_number-1)*lane_width:
+        #     #if user hits the boundaries
+        #     if timer_started:
+        #         player["score"] -= 10
+        #     display_message("Boundary hit !! score down!")
+        #     if lane_number == 4:            
+        #         pygame.draw.rect(WIN, (192, 192, 192), (W, chat_height, input_width, input_height))
 
         #detect collision with enemy car
         enemy_car_shifted_startx = enemy_car_startx + (lane_number-1)*lane_width  
@@ -285,7 +285,7 @@ def display_message(msg):
         # self.display_credit()
         pygame.display.update()
         #self.clock.tick(60)
-        sleep(1)
+        # sleep(1)
 
 def inputHasMouse():
     #check if the mouse is hovering over the chat input area
