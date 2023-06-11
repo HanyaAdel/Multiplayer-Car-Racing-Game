@@ -41,7 +41,7 @@ class GameServer:
                 reply = f"OBSTACLE: {random.randrange(80,240)}"
                 util.broadcast(message= reply, clients=self.session.game_clients)
             
-            if self.session.started and time.time() - self.session.start_time >= 10:
+            if self.session.started and time.time() - self.session.start_time >= 10000:
                 print("session time expired")
                 message = "END:"
                 util.broadcast(message, self.session.game_clients)
