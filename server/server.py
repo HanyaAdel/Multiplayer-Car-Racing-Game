@@ -11,14 +11,19 @@ load_dotenv()
 # Connection Data
 host = ''
 
-port = int(os.getenv('PORT'))
+connection_port = int(os.getenv('CONNECTION_PORT'))
+game_port = int(os.getenv('GAME_PORT'))
 
 # Starting Server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
-server.bind((host, port))
+server.bind((host, connection_port))
 server.listen()
 
+game_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+game_server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
+game_server.bind((host, game_port))
+game_server.listen()    
 # sessions = []
 
 
@@ -35,8 +40,9 @@ def logged_in(id):
 
 def handle_incoming_connection(client, address):
     print("Connected with {}".format(str(address)))
-    chat_client, chat_address = server.accept()
-    game_client, game_address = server.accept()
+
+    chat_client, chat_address = game_server.accept()
+    game_client, game_address = game_server.accept()
 
     print("created game and chat clients")
     username, password = util.parse_username_and_password(util.receive_data(client))
@@ -103,7 +109,7 @@ def listen():
         client, address = server.accept()
         handler_thread = threading.Thread(target=handle_incoming_connection, args=(client, address))
         handler_thread.start()
-        sleep(1)
+        sleep(3)
             
 model = Model()
 listen()

@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 #HOST = 'localhost'
 HOST = os.getenv('HOST')
-PORT = int(os.getenv('PORT'))
+CONNECTION_PORT = int(os.getenv('CONNECTION_PORT'))
+GAME_PORT = int(os.getenv('GAME_PORT'))
 
 class Network:
     """
@@ -19,7 +20,7 @@ class Network:
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
         
         
-        self.addr = (HOST, PORT)
+        self.addr = (HOST, CONNECTION_PORT)
 
     def connect(self, username, password):
         """
@@ -83,7 +84,7 @@ class GameNetwork:
     def __init__(self, addr):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
-        self.client.connect(addr)
+        self.client.connect((HOST,GAME_PORT))
         
     def getInitialGameData(self):
         reply = util.receive_data(self.client)
@@ -124,7 +125,7 @@ class ChatNetwork:
     def __init__(self, addr):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
-        self.client.connect(addr)
+        self.client.connect((HOST,GAME_PORT))
         
     def disconnect(self):
         """

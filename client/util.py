@@ -36,7 +36,7 @@ def send_data(data, client):
 def parse_location(data):
         try:
             d = data.split(":")
-            return int(d[1]), int(d[2]), int(d[3]), int(d[4]), int(d[5])
+            return int(d[1]), d[2], int(d[3]), int(d[4]), int(d[5]), int(d[6])
         except:
             pass
 def parse_leaving_player(data):

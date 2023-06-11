@@ -22,7 +22,7 @@ W, H = 1100, 600
 display_width, display_height = 1350, 600
 input_width, input_height = 250, 100
 chat_height = 500
-max_chat_length = 18
+max_chat_length = 38
 chat_padding = 9
 
 lane_width = W/4
@@ -106,9 +106,15 @@ def redraw_window(players):
             
         #render the player score
         font = pygame.font.SysFont("arial", 20)
+
+        text = font.render("Name : " + str(player["name"]), True, white)
+        WIN.blit(text, ((lane_number - 1) * lane_width, 0))
+
+
         text = font.render("Score : " + str(player["score"]), True, white)
         # text = font.render("Score : " + str(score), True, white)
-        WIN.blit(text, ((lane_number - 1) * lane_width, 0))
+        WIN.blit(text, ((lane_number - 1) * lane_width, 20))
+
         
         #render enemy car
         if enemy_car_startx != 0 and enemy_car_starty != None:
@@ -136,7 +142,7 @@ def main(game_conn, chat_conn):
     x = int((2*lane_number-1)*lane_width/2)
     
     #add the player's data to the players list
-    players.append({'id':current_id, 'x':x, 'y':H - car_height, 'lane':lane_number, 'score': score})
+    players.append({'id':current_id, 'name': "", 'x':x, 'y':H - car_height, 'lane':lane_number, 'score': score})
 
     sendThread = threading.Thread(target=sender_thread)
     receiveThread = threading.Thread(target=receiver_thread)
@@ -255,7 +261,7 @@ def display_ranks(players):
         player = sorted_players[i]
         font = pygame.font.SysFont("arial", 20)
         text = font.render("Rank: " + str(i + 1), True, white)
-        WIN.blit(text, (((player["lane"] - 1) * lane_width)+5, 20))
+        WIN.blit(text, (((player["lane"] - 1) * lane_width)+5, 40))
         
 def display_final_ranks(players):
     #sort players list according to their scores then render the rankings
@@ -389,18 +395,20 @@ def receiver_thread():
                 reply = data
                 header = util.getHeader(reply)
                 if (header == "LOCATION"):
-                    id, x, y, lane, score = util.parse_location(reply)
+                    id,name, x, y, lane, score = util.parse_location(reply)
                     player_idx = util.get_player_idx_by_id(id=id, players=players)
                     if id == current_id:
+                        players[player_idx]['name'] = name
                         continue
                     elif player_idx == -1:
                         # need to add 'score' and 'name' keys 
-                        players.append({'id':id, 'x':x, 'y':y, 'lane':lane, 'score': score})
+                        players.append({'id':id, 'name':name, 'x':x, 'y':y, 'lane':lane, 'score': score})
                     else:
                         players[player_idx]['x'] = x
                         players[player_idx]['y'] = y
                         players[player_idx]['lane'] = lane
                         players[player_idx]['score'] = score
+                        players[player_idx]['name'] = name
                     
 
                 if header == "LEFT":

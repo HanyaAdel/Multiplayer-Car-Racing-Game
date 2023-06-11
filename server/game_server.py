@@ -53,7 +53,7 @@ class GameServer:
                 try:
                     for player in self.session.players:
                         player_id = player['id']
-                        reply = f"LOCATION: {player_id}:{player['x']}:{player['y']}:{player['lane']}:{player['score']}"
+                        reply = f"LOCATION: {player_id}:{player['name']}:{player['x']}:{player['y']}:{player['lane']}:{player['score']}"
 
                         util.send_data(reply, client['client'])
                 except:
