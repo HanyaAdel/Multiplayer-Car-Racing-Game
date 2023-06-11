@@ -47,11 +47,6 @@ class DatabaseManager:
         for table in self.table_list:
             print(f"updating table {table}")
             to_be_inserted = source.get(f"SELECT * from {table};",())
-            args = []
-            for query in to_be_inserted:
-                
-                #arg.extend(list(query))
-                args.append(tuple([table, query]))
             
             if len(to_be_inserted) > 0:
                 num_parameters = len(to_be_inserted[0])

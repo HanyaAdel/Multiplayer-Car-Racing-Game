@@ -19,12 +19,12 @@ server.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 server.bind((host, port))
 server.listen()
 
-sessions = []
+# sessions = []
 
 
 def logged_in(id):
-    global sessions
-    for session in sessions:
+    # global sessions
+    for session in Session.sessions:
         for player in session.players:
             if player['id'] == id:
                 return True
@@ -68,7 +68,7 @@ def handle_incoming_connection(client, address):
         newSession = Session(model=model, expected=expected_num_players)
         code = newSession.session_code
         util.send_data(f"CODE: {code}", client)
-        sessions.append(newSession)
+        Session.sessions.append(newSession)
         newSession.add_client(game_client=game_client, chat_client=chat_client, username=username, client_id=client_id)
         newSession.game_server.start_sender()
 
@@ -79,15 +79,15 @@ def handle_incoming_connection(client, address):
         while not valid_session:
 
             sessionCode = util.receive_data(client)
-            session = util.get_session_by_code(code=sessionCode, sessions = sessions)
+            print("sessions: ", Session.sessions)
+            session = util.get_session_by_code(code=sessionCode, sessions = Session.sessions)
             if session == None :
                 util.send_data("FAIL", client)
-                #client.send("FAIL".encode('ascii'))
                 pass
-            elif len(session.players) == 4:
+            elif len(session.players) == session.expected:
                 util.send_data("FULL", client)
             
-            elif session and len(session.players) < 4:
+            elif session and len(session.players) < session.expected:
                 util.send_data("SUCCESS", client)
                 valid_session = True
         session.add_client(game_client, chat_client, username = username, client_id=client_id)

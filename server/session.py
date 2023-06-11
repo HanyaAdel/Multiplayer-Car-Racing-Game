@@ -5,6 +5,7 @@ import threading
 import util
 
 class Session:
+    sessions = []
     def __init__(self, model, expected):
         self.model = model
         self.numPlayers = 0
@@ -20,8 +21,14 @@ class Session:
         self.session_code = model.addSession()
         self.game_server = GameServer(session = self)
         self.chat_server = ChatServer(session= self)
+
         self.syncThread = threading.Thread(target=self.syncDatabase)
         self.syncThread.start()
+
+    # @staticmethod
+    # def does_exist(code):
+    #     session = util.get_session_by_code(code, Session.sessions)
+    #     return session
 
     def add_client(self, game_client, chat_client, username, client_id):
         score = self.model.addPlayerToSession(player_id = client_id, session_code = self.session_code)
@@ -59,6 +66,9 @@ class Session:
     def closeSession(self):
         self.model.deleteSession(self.session_code)
         self.exist = False
+        print(Session.sessions)
+        Session.sessions.remove(self)
+        print(Session.sessions)
 
     def syncDatabase(self):
         while self.exist:
