@@ -141,14 +141,14 @@ def main(game_conn, chat_conn):
     global players, current_id, server, enemy_car_speed, bg_speed, collision_status
     
     #get player data from the server
-    current_id, num_players,lane, score= game_conn.getInitialGameData()
+    current_id, name, num_players,lane, score= game_conn.getInitialGameData()
     lane_number = lane
     
     #calculate the car initial position on the screen according to the player's lane
     x = int((2*lane_number-1)*lane_width/2)
     
     #add the player's data to the players list
-    players.append({'id':current_id, 'name': "", 'x':x, 'y':H - car_height, 'lane':lane_number, 'score': score})
+    players.append({'id':current_id, 'name': name, 'x':x, 'y':H - car_height, 'lane':lane_number, 'score': score})
 
     sendThread = threading.Thread(target=sender_thread)
     receiveThread = threading.Thread(target=receiver_thread)
@@ -409,13 +409,13 @@ def receiver_thread():
                         continue
                     elif player_idx == -1:
                         # need to add 'score' and 'name' keys 
-                        players.append({'id':id, 'name':name, 'x':x, 'y':y, 'lane':lane, 'score': score})
+                        players.append({'id':id, 'name':name,'x':x, 'y':y, 'lane':lane, 'score': score})
                     else:
                         players[player_idx]['x'] = x
                         players[player_idx]['y'] = y
                         players[player_idx]['lane'] = lane
                         players[player_idx]['score'] = score
-                        players[player_idx]['name'] = name
+                        #players[player_idx]['name'] = name
                     
 
                 if header == "LEFT":

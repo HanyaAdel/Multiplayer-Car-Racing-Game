@@ -105,7 +105,7 @@ class GameServer:
     def add_client(self, id, game_client):
         self.session.game_clients.append({ 'id': id, 'client': game_client })
         index = util.get_player_idx_by_id(id, self.session.players)
-        message = f"{id}:{len(self.session.players)}:{self.session.players[index]['lane']}:{self.session.players[index]['score']}"
+        message = f"{id}:{self.session.players[index]['name']}: {len(self.session.players)}:{self.session.players[index]['lane']}:{self.session.players[index]['score']}"
 
         util.send_data(message, game_client)
 
