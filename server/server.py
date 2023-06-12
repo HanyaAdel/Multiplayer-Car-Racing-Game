@@ -90,10 +90,10 @@ def handle_incoming_connection(client, address):
             if session == None :
                 util.send_data("FAIL", client)
                 pass
-            elif len(session.players) == session.expected:
+            elif len(session.players) >= session.expected or (session.started and model.getPlayerScore(client_id,sessionCode) == None):
                 util.send_data("FULL", client)
             
-            elif session and len(session.players) < session.expected:
+            else:
                 util.send_data("SUCCESS", client)
                 valid_session = True
         session.add_client(game_client, chat_client, username = username, client_id=client_id)

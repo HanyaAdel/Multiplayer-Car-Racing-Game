@@ -39,9 +39,11 @@ class Session:
         self.chat_server.add_client(id=client_id, chat_client=chat_client, messages=messages)
         self.numPlayers += 1
         print(f"number of players:{self.numPlayers}, expected:{self.expected}")
+        if self.started:
+            util.send_data("START:",game_client)
         if(self.numPlayers==self.expected):
             self.start_timer()
-    
+
     def start_timer(self):
         if not self.started:
             self.started = True
