@@ -30,8 +30,8 @@ class Network:
         """
         self.client.connect(self.addr)
         
-        self.chat_connection = ChatNetwork(addr=self.addr)
-        self.game_connection = GameNetwork(addr=self.addr)
+        self.chat_connection = ChatNetwork()
+        self.game_connection = GameNetwork()
 
 
         util.send_data(f"{username}:{password}", self.client)
@@ -81,7 +81,7 @@ class Network:
         self.client.close()
 
 class GameNetwork:
-    def __init__(self, addr):
+    def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
         self.client.connect((HOST,GAME_PORT))
@@ -90,7 +90,7 @@ class GameNetwork:
         reply = util.receive_data(self.client)
         print("message received: ", reply)
         d = reply.split(":")
-        return int(d[0]), int(d[1]), int(d[2]), int(d[3])
+        return int(d[0]), d[1], int(d[2]), int(d[3]), int(d[4])
     
     def send_game(self, data, pick=False):
         """
@@ -122,7 +122,7 @@ class GameNetwork:
 
 
 class ChatNetwork:
-    def __init__(self, addr):
+    def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
         self.client.connect((HOST,GAME_PORT))
