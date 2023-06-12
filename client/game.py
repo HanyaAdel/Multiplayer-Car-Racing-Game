@@ -455,28 +455,7 @@ def receive_chat_messages():
     global chat_conn
     while True:
         try:
-            header = chat_conn.client.recv(4)
-            if not header:
-                break
-
-            # Parse the header
-            msg_len = int.from_bytes(header[0:4], byteorder="big")
-
-            # Receive the message data
-            chunks = []
-            bytes_recd = 0
-            while bytes_recd < msg_len:
-                chunk = chat_conn.client.recv(min(msg_len - bytes_recd,
-                                    BUFFER_SIZE))
-                if not chunk:
-                    raise RuntimeError("ERROR")
-                chunks.append(chunk)
-                bytes_recd += len(chunk)
-
-            data = b"".join(chunks)
-
-            # Print the message
-            message = data.decode("utf-8").strip()
+            message = util.receive_data(chat_conn.client)
             messages.append(message)
             print(message)            
         except:

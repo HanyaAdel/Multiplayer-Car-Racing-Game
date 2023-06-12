@@ -36,10 +36,11 @@ class GameServer:
         counter = 0
         while True:
             counter += 1
-            if counter == 350:
+            if counter == 240:
                 counter = 0
-                reply = f"OBSTACLE: {random.randrange(80,240)}"
-                util.broadcast(message= reply, clients=self.session.game_clients)
+                if self.session.started:
+                    reply = f"OBSTACLE: {random.randrange(80,240)}"
+                    util.broadcast(message= reply, clients=self.session.game_clients)
             
             if self.session.started and time.time() - self.session.start_time >= 10000:
                 print("session time expired")
