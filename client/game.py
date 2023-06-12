@@ -74,10 +74,11 @@ enemy_car_height = 100
 timer_ended = False
 timer_started = False
 
+collision_status = False
 
 def redraw_window(players):
  
-    global bg_y1, bg_y2, bg_speed, bgImg, enemy_car_starty
+    global bg_y1, bg_y2, bg_speed, bgImg, enemy_car_starty, collision_status
     
     #render the background and adjust its movement
     WIN.blit(bgImg, (bg_x1, bg_y1))
@@ -115,7 +116,12 @@ def redraw_window(players):
         # text = font.render("Score : " + str(score), True, white)
         WIN.blit(text, ((lane_number - 1) * lane_width, 20))
 
-        
+        if timer_started == False:
+            display_message("Waiting for players")
+
+        if collision_status:
+             display_message("Collision !! score down!")
+             
         #render enemy car
         if enemy_car_startx != 0 and enemy_car_starty != None:
             WIN.blit(enemy_car, (enemy_car_startx + (lane_number - 1) * lane_width , enemy_car_starty))
@@ -132,7 +138,7 @@ def redraw_window(players):
 
 def main(game_conn, chat_conn):
     
-    global players, current_id, server, enemy_car_speed, bg_speed
+    global players, current_id, server, enemy_car_speed, bg_speed, collision_status
     
     #get player data from the server
     current_id, num_players,lane, score= game_conn.getInitialGameData()
@@ -172,7 +178,7 @@ def main(game_conn, chat_conn):
     #modify to while game_running
     while run:
         clock.tick(60) # 30 fps max
-        
+        collision_status = False
         #get the current player from the players list
         player_idx = util.get_player_idx_by_id(id=current_id, players=players)
         player = players[player_idx]
@@ -209,7 +215,8 @@ def main(game_conn, chat_conn):
                     # display_message("Game Over !!!")
                     if timer_started:
                         player["score"] -= 10
-                    display_message("Collision !! score down!")
+                        collision_status = True
+                        # display_message("Collision !! score down!")
 
         #adjust player score, bg speed, and enemy car speed
         if timer_started: 
@@ -287,9 +294,9 @@ def display_final_ranks(players):
 def display_message(msg):
         font = pygame.font.SysFont("comicsansms", 72, True)
         text = font.render(msg, True, (255, 255, 255))
-        WIN.blit(text, (700 - text.get_width() // 2, 240 - text.get_height() // 2))
+        WIN.blit(text, (550 - text.get_width() // 2, 240 - text.get_height() // 2))
         # self.display_credit()
-        pygame.display.update()
+        # pygame.display.update()
         #self.clock.tick(60)
         # sleep(1)
 
