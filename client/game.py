@@ -67,7 +67,7 @@ car_height = 100
 enemy_car = pygame.image.load('assets/enemy_car.png')
 enemy_car_startx = 0
 enemy_car_starty = 0
-enemy_car_speed = 15
+enemy_car_speed = 20
 enemy_car_width = 49
 enemy_car_height = 100
 
@@ -249,6 +249,7 @@ def main(game_conn, chat_conn):
         # redraw window then update the frame
         redraw_window(players)
         display_chat()
+        display_fps(clock.get_fps())
         pygame.display.update()
         clock.tick(60)
         
@@ -374,6 +375,11 @@ def display_chat():
                     pygame.draw.rect(WIN, (255, 247, 174), (W, 0, input_width, chat_height))
                     y = 30
 
+def display_fps(fps):
+    font = pygame.font.SysFont("comicsansms", 20, True)
+    text = font.render("FPS : " + str(round(fps)), True, (0,0,0))
+    WIN.blit(text, (1250, 0))
+
 def sender_thread():
     global current_id, game_conn
     clock = pygame.time.Clock()
@@ -467,7 +473,9 @@ def receive_chat_messages():
 # Sending Messages To Server
 def write_chat_messages():
     global chat_conn, message, message_ready
+    clock = pygame.time.Clock()
     while True:
+        clock.tick(60)
         #send message from gui not terminal
         #message = input('')
         if(message_ready):
