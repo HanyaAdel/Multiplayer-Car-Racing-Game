@@ -109,12 +109,12 @@ def redraw_window(players):
         font = pygame.font.SysFont("arial", 20)
 
         text = font.render("Name : " + str(player["name"]), True, white)
-        WIN.blit(text, ((lane_number - 1) * lane_width, 0))
+        WIN.blit(text, ((lane_number - 1) * lane_width+5, 0))
 
 
         text = font.render("Score : " + str(player["score"]), True, white)
         # text = font.render("Score : " + str(score), True, white)
-        WIN.blit(text, ((lane_number - 1) * lane_width, 20))
+        WIN.blit(text, ((lane_number - 1) * lane_width+5, 20))
 
         if timer_started == False:
             display_message("Waiting for players")
