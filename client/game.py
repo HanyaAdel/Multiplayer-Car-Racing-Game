@@ -219,7 +219,7 @@ def main(game_conn, chat_conn):
                         # display_message("Collision !! score down!")
 
         #adjust player score, bg speed, and enemy car speed
-        if timer_started: 
+        if timer_started and not timer_ended: 
             player["score"] += 1
             # if (player["score"] % 100 == 0):
             #     if enemy_car_speed < 30:
@@ -242,13 +242,13 @@ def main(game_conn, chat_conn):
                 print("has mouse and key down!!")
                 read_chat_input(event)
 
-        #if timer elapsed from the server, show ranking and exit the run
-        if timer_ended == True:
-               display_final_ranks(players)
                
         # redraw window then update the frame
         redraw_window(players)
         display_chat()
+        #if timer elapsed from the server, show ranking
+        if timer_ended == True:
+               display_final_ranks(players)
         display_fps(clock.get_fps())
         pygame.display.update()
         clock.tick(60)
@@ -273,7 +273,7 @@ def display_ranks(players):
         
 def display_final_ranks(players):
     #sort players list according to their scores then render the rankings
-    while True:
+    # while True:
         sorted_players_asc = sorted(players, key=operator.itemgetter('score'))
         sorted_players = sorted_players_asc[::-1]  
         for i in range(0, len(sorted_players)):
@@ -289,7 +289,7 @@ def display_final_ranks(players):
                 text = font.render("Rank: " + str(i + 1), True, (148,0,211))
             
             WIN.blit(text, (((player["lane"] - 1) * lane_width)+ lane_width/2 - 50, display_height / 2))
-            pygame.display.update()
+            # pygame.display.update()
             #sleep(5)
             
 def display_message(msg):
