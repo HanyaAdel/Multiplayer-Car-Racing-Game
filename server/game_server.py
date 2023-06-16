@@ -34,7 +34,7 @@ class GameServer:
 
     def sender_thread(self):
         counter = 0
-        while True:
+        while self.session.exist:
             counter += 1
             if counter == 240:
                 counter = 0

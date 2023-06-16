@@ -7,8 +7,8 @@ class DatabaseManager:
         self.primary_database = Database(isPrimary=True)
         self.secondary_database = Database(isPrimary=False)
         self.table_list = ["player", "session", "message_in_session", "player_in_session"]
-        self.primary_reconnection_thread = threading.Thread(target=self.primary_reconnect)
-        self.secondary_reconnection_thread = threading.Thread(target=self.secondary_reconnect)
+        self.primary_reconnection_thread = threading.Thread(target=self.primary_reconnect, daemon=True)
+        self.secondary_reconnection_thread = threading.Thread(target=self.secondary_reconnect, daemon=True)
 
         self.primary_reconnection_thread.start()
         self.secondary_reconnection_thread.start()
