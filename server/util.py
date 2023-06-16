@@ -42,7 +42,7 @@ def send_data(data, client):
 def receive_data(client):
     header = client.recv(4)
     if not header:
-        return
+        raise Exception
 
     # Parse the header
     msg_len = int.from_bytes(header[0:4], byteorder="big")

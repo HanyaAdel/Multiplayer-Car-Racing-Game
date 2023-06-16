@@ -18,7 +18,9 @@ class DatabaseManager:
     
     def primary_reconnect(self):
         while True:
-            if self.primary_database.isOnline == False:
+            if self.primary_database.test_connection.is_connected() == False:
+                self.primary_database.isOnline = False
+                self.primary_database.needsSync = True
                 try:
                     self.primary_database.test_connection.reconnect(3,0)
                 except Exception as e:
@@ -29,7 +31,9 @@ class DatabaseManager:
         
     def secondary_reconnect(self):
         while True:
-            if self.secondary_database.isOnline == False:
+            if self.secondary_database.test_connection.is_connected() == False:
+                self.secondary_database.isOnline = False
+                self.secondary_database.needsSync = True
                 try:
                     self.secondary_database.test_connection.reconnect(3,0)
                 except Exception as e:

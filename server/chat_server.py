@@ -14,6 +14,8 @@ class ChatServer:
             client['client'].sendall(header + message.encode('utf-8'))            
 
     def handle_chat(self, client_socket):
+        player_idx = util.get_client_idx_by_socket(client_socket, self.session.chat_clients)
+        player_name = self.session.players[player_idx]['name']
         while True:
 
             try:
@@ -32,12 +34,12 @@ class ChatServer:
 
             except:
                 # Removing And Closing Clients
-                index = util.get_client_idx_by_socket(client_socket, self.session.chat_clients)
-                self.session.chat_clients.pop(index)
+                # index = util.get_client_idx_by_socket(client_socket, self.session.chat_clients)
+                self.session.chat_clients.pop(player_idx)
                 client_socket.close()
-                name = self.session.players[index]['name']
+                # name = self.session.players[index]['name']
 
-                self.broadcast_messages('{} left!'.format(name))
+                self.broadcast_messages(f'{player_name} left!')
 
                 break
     
